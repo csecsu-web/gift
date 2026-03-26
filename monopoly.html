@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monopoly Board Generator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:Arial, sans-serif; background:#f0f2f5; padding:20px; }
+  h1 { text-align:center; color:#333; margin-bottom:20px; }
+  .panel { background:white; border-radius:10px; padding:24px; max-width:700px; margin:0 auto 20px; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+  label { font-weight:bold; display:block; margin-bottom:6px; color:#444; font-size:14px; }
+  input[type=file] { width:100%; padding:10px; border:2px dashed #aaa; border-radius:8px; margin-bottom:12px; cursor:pointer; }
+  input[type=text] { width:100%; padding:10px; border:1px solid #ccc; border-radius:8px; font-size:14px; margin-bottom:12px; }
+  .thumbs { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
+  .thumb { width:50px; height:50px; border-radius:5px; object-fit:cover; border:2px solid #ddd; }
+  .count { font-size:13px; color:#666; margin-bottom:16px; }
+  .count span { font-weight:bold; color:#27ae60; }
+  .btns { display:flex; gap:10px; flex-wrap:wrap; }
+  button { padding:12px 24px; border:none; border-radius:8px; font-size:15px; font-weight:bold; cursor:pointer; transition:0.2s; }
+  .btn-gen { background:#27ae60; color:white; }
+  .btn-gen:hover { background:#1e8449; }
+  .btn-dl { background:#2980b9; color:white; display:none; }
+  .btn-dl:hover { background:#1f618d; }
+  .btn-clear { background:#e74c3c; color:white; }
+  .error { background:#ffe0e0; color:#c0392b; padding:12px; border-radius:8px; margin-top:12px; display:none; }
+  #board-section { display:none; text-align:center; }
+  #board-section h2 { color:#333; margin-bottom:16px; }
+
+  /* BOARD */
+  .board-wrap { display:inline-block; border:6px solid #1a1a1a; background:white; }
+  .board-inner { display:grid; grid-template-columns:80px repeat(7,52px) 80px; grid-template-rows:80px repeat(7,52px) 80px; }
+
+  .space { border:1px solid #999; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:7px; text-align:center; overflow:hidden; padding:2px; background:#fff; }
+  .space img { width:100%; height:60%; object-fit:cover; }
+  .space-name { font-size:6px; color:#333; line-height:1.2; margin-top:2px; word-break:break-word; }
+
+  .corner { border:1px solid #999; display:flex; flex-direction:column; align-items:center; justify-content:center; font-weight:bold; font-size:9px; text-align:center; overflow:hidden; background:#c8f7c5; }
+  .corner img { width:100%; height:60%; object-fit:cover; }
+  .corner-name { font-size:8px; color:#1a5e1a; line-height:1.2; }
+
+  .center { grid-column:2/9; grid-row:2/9; display:flex; align-items:center; justify-content:center; background:#e8f4e8; }
+  .center-text { font-size:28px; font-weight:bold; color:#1a5e1a; text-align:center; transform:rotate(0deg); }
+
+  @media print {
+    body { background:white; padding:0; }
+    .panel:first-child { display:none; }
+    .board-wrap { border-width:4px; }
+  }
+</style>
+</head>
+<body>
+<div class="panel">
+  <h1>🎲 Monopoly Board Generator</h1>
+
+  <label>Upload 28 images (4 corners + 24 spaces):</label>
+  <input type="file" id="img-input" multiple accept="image/*">
+  <div class="thumbs" id="thumbs"></div>
+  <div class="count">Images: <span id="img-count">0</span> / 28</div>
+
+  <label>Space names (comma-separated, 28 total):</label>
+  <input type="text" id="names-input" placeholder="Go, Jail, Free Parking, Go To Jail, Mediterranean Ave, Baltic Ave, ...">
+
+  <div class="btns">
+    <button class="btn-gen" onclick="generate()">Generate Board</button>
+    <button class="btn-dl" id="dl-btn" onclick="downloadPDF()">Download PDF</button>
+    <button class="btn-clear btn" onclick="clearAll()">Clear</button>
+  </div>
+  <div class="error" id="error-msg"></div>
+</div>
+
+<div id="board-section" class="panel" style="max-width:900px;">
+  <h2>Your Monopoly Board</h2>
+  <div id="board-wrap-outer"></div>
+</div>
+
+<script>
+let images = [];
+
+document.getElementById('img-input').addEventListener('change', function(e) {
+  images = [];
+  document.getElementById('thumbs').innerHTML = '';
+  const files = Array.from(e.target.files);
+  let loaded = 0;
+  files.forEach((file, i) => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      images[i] = ev.target.result;
+      loaded++;
+      const img = document.createElement('img');
+      img.className = 'thumb';
+      img.src = ev.target.result;
+      document.getElementById('thumbs').appendChild(img);
+      document.getElementById('img-count').textContent = loaded;
+    };
+    reader.readAsDataURL(file);
+  });
+});
+
+function generate() {
+  const errEl = document.getElementById('error-msg');
+  errEl.style.display = 'none';
+  const filled = images.filter(Boolean).length;
+
+  if (filled < 28) {
+    errEl.textContent = `Need 28 images. You have ${filled}.`;
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const rawNames = document.getElementById('names-input').value;
+  const names = rawNames ? rawNames.split(',').map(s => s.trim()) : [];
+  while (names.length < 28) names.push('');
+
+  // Board layout: 9x9 grid
+  // Positions: corners at (0,0),(0,8),(8,0),(8,8)
+  // bottom row left→right: indices 0..8 (images 0..8, names 0..8)
+  // right col bottom→top: indices 9..15 (but skip corners)
+  // top row right→left: 16..24
+  // left col top→bottom: 25..27 (skip corners)
+
+  // We'll define 28 slots: 0=bottom-right corner, 1-7=bottom row, 8=bottom-left corner,
+  // 9-15=left col, 16=top-left corner, 17-23=top row, 24=top-right corner, 25-27=right col (partial)
+  // Actually let's do standard monopoly clockwise from bottom-right
+
+  // Slots order (clockwise from bottom-right corner):
+  // 0: corner bottom-right
+  // 1-6: bottom row (right to left)
+  // 7: corner bottom-left
+  // 8-13: left col (bottom to top)
+  // 14: corner top-left
+  // 15-20: top row (left to right) — only 6 spaces between corners? 7 spaces per side + 2 corners = 9 columns, so 7 interior
+  // Actually board is 9x9: 7 spaces per side between corners
+
+  // Let me simplify: 4 corners + 7 spaces per side = 4 + 28 = 32... 
+  // Standard monopoly: 4 corners + 9 spaces per side = 40 total
+  // Our version: 4 corners + 6 spaces per side = 28 total (fits our 28 images)
+
+  // Grid is 8x8: corners at cells (0,0)(0,7)(7,0)(7,7)
+  // Bottom: row 7, cols 0-7. Top: row 0, cols 0-7. Left: col 0, rows 0-7. Right: col 7, rows 0-7.
+
+  // Slot assignment:
+  // 0 = bottom-right corner (7,7)
+  // 1-6 = bottom row right to left: (7,6),(7,5),(7,4),(7,3),(7,2),(7,1)
+  // 7 = bottom-left corner (7,0)
+  // 8-13 = left col bottom to top: (6,0),(5,0),(4,0),(3,0),(2,0),(1,0)
+  // 14 = top-left corner (0,0)
+  // 15-20 = top row left to right: (0,1),(0,2),(0,3),(0,4),(0,5),(0,6)
+  // 21 = top-right corner (0,7)
+  // 22-27 = right col top to bottom: (1,7),(2,7),(3,7),(4,7),(5,7),(6,7)
+
+  const ROWS = 8, COLS = 8;
+  const grid = Array.from({length: ROWS}, () => Array(COLS).fill(null));
+
+  const positions = [
+    [7,7],[7,6],[7,5],[7,4],[7,3],[7,2],[7,1],
+    [7,0],
+    [6,0],[5,0],[4,0],[3,0],[2,0],[1,0],
+    [0,0],
+    [0,1],[0,2],[0,3],[0,4],[0,5],[0,6],
+    [0,7],
+    [1,7],[2,7],[3,7],[4,7],[5,7],[6,7]
+  ];
+
+  const corners = new Set([0, 7, 14, 21]);
+
+  positions.forEach(([r,c], i) => {
+    grid[r][c] = { img: images[i], name: names[i], isCorner: corners.has(i) };
+  });
+
+  // Build the HTML grid
+  let html = '<div class="board-wrap"><div class="board-inner">';
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      if (r >= 1 && r <= 6 && c >= 1 && c <= 6) {
+        if (r === 1 && c === 1) {
+          html += `<div class="center" style="grid-column:2/8; grid-row:2/8;"><div class="center-text">FREE<br>PARKING</div></div>`;
+        }
+        continue;
+      }
+      const cell = grid[r][c];
+      if (!cell) { html += '<div></div>'; continue; }
+      const cls = cell.isCorner ? 'corner' : 'space';
+      html += `<div class="${cls}">
+        <img src="${cell.img}" alt="">
+        <div class="${cls === 'corner' ? 'corner-name' : 'space-name'}">${cell.name}</div>
+      </div>`;
+    }
+  }
+  html += '</div></div>';
+
+  document.getElementById('board-wrap-outer').innerHTML = html;
+  document.getElementById('board-section').style.display = 'block';
+  document.getElementById('dl-btn').style.display = 'inline-block';
+  document.getElementById('board-section').scrollIntoView({ behavior: 'smooth' });
+}
+
+function downloadPDF() {
+  html2pdf().set({
+    margin: 5,
+    filename: 'monopoly_board.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+  }).from(document.getElementById('board-section')).save();
+}
+
+function clearAll() {
+  images = [];
+  document.getElementById('img-input').value = '';
+  document.getElementById('thumbs').innerHTML = '';
+  document.getElementById('img-count').textContent = '0';
+  document.getElementById('names-input').value = '';
+  document.getElementById('board-wrap-outer').innerHTML = '';
+  document.getElementById('board-section').style.display = 'none';
+  document.getElementById('dl-btn').style.display = 'none';
+  document.getElementById('error-msg').style.display = 'none';
+}
+</script>
+</body>
+</html>
