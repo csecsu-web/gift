@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Doblet Card Generator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: Arial, sans-serif; background:#f0f2f5; padding:20px; }
+  h1 { text-align:center; color:#333; margin-bottom:20px; }
+  .panel { background:white; border-radius:10px; padding:24px; max-width:900px; margin:0 auto 20px; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+  label { font-weight:bold; display:block; margin-bottom:6px; color:#444; }
+  input[type=file] { width:100%; padding:10px; border:2px dashed #aaa; border-radius:8px; margin-bottom:16px; cursor:pointer; }
+  .thumbs { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+  .thumb { width:60px; height:60px; border-radius:6px; object-fit:cover; border:2px solid #ddd; }
+  .count { font-size:14px; color:#666; margin-bottom:16px; }
+  .count span { font-weight:bold; color: #5a3ecb; }
+  .btns { display:flex; gap:10px; flex-wrap:wrap; }
+  button { padding:12px 24px; border:none; border-radius:8px; font-size:15px; font-weight:bold; cursor:pointer; transition:0.2s; }
+  .btn-gen { background:#5a3ecb; color:white; }
+  .btn-gen:hover { background:#4530a8; }
+  .btn-dl { background:#27ae60; color:white; display:none; }
+  .btn-dl:hover { background:#1e8449; }
+  .btn-clear { background:#e74c3c; color:white; }
+  .btn-clear:hover { background:#c0392b; }
+  .error { background:#ffe0e0; color:#c0392b; padding:12px; border-radius:8px; margin-top:12px; display:none; }
+  #cards-section { display:none; }
+  #cards-section h2 { text-align:center; color:#333; margin-bottom:16px; }
+  .cards-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:16px; }
+
+  .card {
+    width:220px; height:220px;
+    border:3px solid #333;
+    border-radius:50%;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    grid-template-rows:repeat(2,1fr);
+    gap:5px;
+    padding:18px;
+    background:white;
+    position:relative;
+    margin:auto;
+  }
+  .symbol {
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden; border-radius:4px;
+  }
+  .symbol img { width:100%; height:100%; object-fit:contain; }
+  .card-num {
+    position:absolute; top:-10px; left:50%; transform:translateX(-50%);
+    background:#5a3ecb; color:white; padding:2px 8px;
+    border-radius:10px; font-size:11px; font-weight:bold;
+  }
+
+  @media print {
+    body { background:white; padding:0; }
+    .panel:first-child, #cards-section h2 { display:none; }
+    .cards-grid { grid-template-columns:repeat(3,1fr); gap:10px; }
+    .card { page-break-inside:avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="panel">
+  <h1>🎯 Doblet Card Generator</h1>
+  <label>Upload your 31 images:</label>
+  <input type="file" id="img-input" multiple accept="image/*">
+  <div class="thumbs" id="thumbs"></div>
+  <div class="count">Images uploaded: <span id="img-count">0</span> / 31</div>
+  <div class="btns">
+    <button class="btn-gen" onclick="generate()">Generate 31 Cards</button>
+    <button class="btn-dl" id="dl-btn" onclick="downloadPDF()">Download PDF</button>
+    <button class="btn-clear" onclick="clearAll()">Clear</button>
+  </div>
+  <div class="error" id="error-msg"></div>
+</div>
+
+<div id="cards-section" class="panel">
+  <h2>Your 31 Doblet Cards</h2>
+  <div class="cards-grid" id="cards-grid"></div>
+</div>
+
+<script>
+let images = [];
+
+document.getElementById('img-input').addEventListener('change', function(e) {
+  images = [];
+  document.getElementById('thumbs').innerHTML = '';
+  document.getElementById('img-count').textContent = '0';
+
+  const files = Array.from(e.target.files);
+  let loaded = 0;
+
+  files.forEach((file, i) => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      images[i] = ev.target.result;
+      loaded++;
+      const img = document.createElement('img');
+      img.className = 'thumb';
+      img.src = ev.target.result;
+      document.getElementById('thumbs').appendChild(img);
+      document.getElementById('img-count').textContent = loaded;
+    };
+    reader.readAsDataURL(file);
+  });
+});
+
+function generateCards() {
+  // Projective plane of order 5: 31 cards, 31 symbols, 6 per card
+  // Each pair of cards shares EXACTLY 1 symbol
+  const n = 5;
+  const cards = [];
+
+  // Card 0: first n+1 symbols
+  const first = [];
+  for (let i = 0; i <= n; i++) first.push(i);
+  cards.push(first);
+
+  // Cards 1..n: each row of n symbols mapped through affine plane
+  for (let r = 0; r < n; r++) {
+    const card = [0];
+    for (let c = 0; c < n; c++) {
+      card.push(n + 1 + r * n + c);
+    }
+    cards.push(card);
+  }
+
+  // Remaining n^2 cards
+  for (let r = 0; r < n; r++) {
+    for (let c = 0; c < n; c++) {
+      const card = [r + 1];
+      for (let k = 0; k < n; k++) {
+        card.push(n + 1 + k * n + ((c + r * k) % n));
+      }
+      cards.push(card);
+    }
+  }
+
+  return cards; // 31 cards, each with 6 symbols (indices 0-30)
+}
+
+function generate() {
+  const errEl = document.getElementById('error-msg');
+  errEl.style.display = 'none';
+
+  if (images.length < 31 || images.filter(Boolean).length < 31) {
+    errEl.textContent = `Please upload all 31 images. You have ${images.filter(Boolean).length} so far.`;
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const cards = generateCards();
+  const grid = document.getElementById('cards-grid');
+  grid.innerHTML = '';
+
+  cards.forEach((card, idx) => {
+    const cardEl = document.createElement('div');
+    cardEl.className = 'card';
+
+    const numEl = document.createElement('div');
+    numEl.className = 'card-num';
+    numEl.textContent = '#' + (idx + 1);
+    cardEl.appendChild(numEl);
+
+    card.forEach(symIdx => {
+      const sym = document.createElement('div');
+      sym.className = 'symbol';
+      const imgEl = document.createElement('img');
+      imgEl.src = images[symIdx];
+      imgEl.alt = 'symbol';
+      sym.appendChild(imgEl);
+      cardEl.appendChild(sym);
+    });
+
+    grid.appendChild(cardEl);
+  });
+
+  document.getElementById('cards-section').style.display = 'block';
+  document.getElementById('dl-btn').style.display = 'inline-block';
+  document.getElementById('cards-section').scrollIntoView({ behavior: 'smooth' });
+}
+
+function downloadPDF() {
+  const el = document.getElementById('cards-section');
+  html2pdf().set({
+    margin: 8,
+    filename: 'doblet_cards.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  }).from(el).save();
+}
+
+function clearAll() {
+  images = [];
+  document.getElementById('img-input').value = '';
+  document.getElementById('thumbs').innerHTML = '';
+  document.getElementById('img-count').textContent = '0';
+  document.getElementById('cards-grid').innerHTML = '';
+  document.getElementById('cards-section').style.display = 'none';
+  document.getElementById('dl-btn').style.display = 'none';
+  document.getElementById('error-msg').style.display = 'none';
+}
+</script>
+</body>
+</html>
