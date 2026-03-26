@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎮 Our Games</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --gold: #f5c518;
+  --red: #e63946;
+  --green: #2dc653;
+  --blue: #4361ee;
+  --purple: #7b2d8b;
+  --orange: #f4a261;
+  --dark: #12111a;
+  --card: #1e1c2e;
+  --border: rgba(255,255,255,0.08);
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--dark);
+  min-height: 100vh;
+  color: #fff;
+}
+
+/* ─── HEADER ─── */
+.site-header {
+  text-align: center;
+  padding: 32px 20px 0;
+}
+.site-header h1 {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  color: var(--gold);
+  letter-spacing: 2px;
+  text-shadow: 0 0 40px rgba(245,197,24,0.3);
+}
+.site-header p {
+  color: rgba(255,255,255,0.45);
+  margin-top: 6px;
+  font-size: 0.9rem;
+}
+
+/* ─── TABS ─── */
+.tab-bar {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px 20px 0;
+}
+.tab-btn {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.15rem;
+  padding: 11px 34px;
+  border: 2px solid transparent;
+  border-radius: 50px;
+  cursor: pointer;
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.55);
+  transition: all .22s;
+  letter-spacing: 0.5px;
+}
+.tab-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+.tab-btn.active-dobble  { background: var(--red);    color: #fff; border-color: #ff8585; box-shadow: 0 0 24px rgba(230,57,70,0.45); }
+.tab-btn.active-mono    { background: var(--green);  color: #fff; border-color: #7ef9a0; box-shadow: 0 0 24px rgba(45,198,83,0.45); }
+
+/* ─── PANELS ─── */
+.panel { display: none; max-width: 1100px; margin: 0 auto; padding: 28px 20px 80px; }
+.panel.active { display: block; }
+
+/* ─── SECTION BOX ─── */
+.box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 28px 32px;
+  margin-bottom: 24px;
+}
+.box h2 {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+}
+.box p { color: rgba(255,255,255,0.55); line-height: 1.7; font-size: 0.93rem; }
+
+/* ─── UPLOAD ZONE ─── */
+.upload-zone {
+  border: 2px dashed rgba(255,255,255,0.18);
+  border-radius: 16px;
+  padding: 28px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color .2s, background .2s;
+  margin-top: 18px;
+}
+.upload-zone:hover { border-color: rgba(255,255,255,0.45); background: rgba(255,255,255,0.03); }
+.upload-zone p { color: rgba(255,255,255,0.4); font-size: 0.88rem; margin-top: 8px; }
+.upload-lbl {
+  display: inline-block;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #fff;
+  font-family: 'Fredoka One', cursive;
+  font-size: 1rem;
+  padding: 9px 26px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: background .2s;
+}
+.upload-lbl:hover { background: rgba(255,255,255,0.18); }
+input[type=file] { display: none; }
+
+/* ─── THUMB GRID ─── */
+.thumb-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 8px;
+  margin-top: 18px;
+}
+.thumb-grid img {
+  width: 72px; height: 72px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 2px solid transparent;
+}
+.photo-count { font-family: 'Fredoka One', cursive; font-size: 0.95rem; color: var(--gold); margin-top: 10px; }
+
+/* ─── BIG BUTTONS ─── */
+.btn-primary {
+  display: block;
+  width: 100%;
+  max-width: 380px;
+  margin: 20px auto 0;
+  background: linear-gradient(135deg, var(--red), #ff6b6b);
+  color: #fff;
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.2rem;
+  padding: 15px;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 6px 24px rgba(230,57,70,0.4);
+  transition: transform .18s, box-shadow .18s;
+  letter-spacing: 0.5px;
+}
+.btn-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 32px rgba(230,57,70,0.5); }
+.btn-primary.green-btn {
+  background: linear-gradient(135deg, #2dc653, #52e88a);
+  box-shadow: 0 6px 24px rgba(45,198,83,0.4);
+}
+.btn-primary.green-btn:hover { box-shadow: 0 10px 32px rgba(45,198,83,0.5); }
+
+/* ─── PRINT AREA ─── */
+#cards-output, #mono-output { margin-top: 28px; }
+
+/* ════════════════════
+   DOBBLE PRINT STYLES
+   ════════════════════ */
+.dobble-card {
+  width: 210px; height: 210px;
+  border-radius: 50%;
+  border: 3px solid #222;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  position: relative;
+  overflow: hidden;
+  background: #fff;
+  margin: 8px;
+  vertical-align: top;
+}
+.dobble-card-inner {
+  width: 100%; height: 100%;
+  position: relative;
+}
+.dobble-sym {
+  position: absolute;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid rgba(0,0,0,0.15);
+}
+.dobble-sym img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ════════════════════
+   MONOPOLY STYLES
+   ════════════════════ */
+.mono-section-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.3rem;
+  color: var(--gold);
+  margin: 28px 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Board */
+.mono-board {
+  display: grid;
+  grid-template-columns: 88px repeat(9, 60px) 88px;
+  grid-template-rows: 88px repeat(9, 60px) 88px;
+  border: 3px solid #1a1a1a;
+  background: #e8f5d4;
+  width: fit-content;
+  margin: 0 auto;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.mono-cell {
+  border: 1px solid #1a1a1a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 7px;
+  font-weight: 700;
+  font-family: 'Nunito', sans-serif;
+  background: #e8f5d4;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  text-align: center;
+  padding: 2px;
+  color: #111;
+}
+.mono-cell:hover { filter: brightness(0.93); }
+.mono-cell .color-bar {
+  width: 100%;
+  height: 14px;
+  flex-shrink: 0;
+}
+.mono-cell .cell-photo {
+  width: 100%;
+  flex: 1;
+  object-fit: cover;
+  display: block;
+}
+.mono-cell .cell-name {
+  font-size: 6.5px;
+  text-align: center;
+  line-height: 1.2;
+  padding: 1px 2px;
+  word-break: break-word;
+}
+.mono-cell .cell-price {
+  font-size: 6px;
+  color: #333;
+}
+.mono-corner {
+  font-size: 8px;
+  font-weight: 800;
+}
+.mono-center {
+  grid-column: 2 / 11;
+  grid-row: 2 / 11;
+  background: #e8f5d4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  border: 1px solid #1a1a1a;
+}
+.mono-center h2 {
+  font-family: 'Fredoka One', cursive;
+  font-size: 2.2rem;
+  color: #1a5e20;
+  letter-spacing: 3px;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.08);
+}
+.mono-center p {
+  font-size: 0.75rem;
+  color: #555;
+  margin-top: 4px;
+}
+.mono-center .friend-faces {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 14px;
+  max-width: 420px;
+}
+.mono-center .friend-faces img {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Property Cards */
+.prop-cards-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+.prop-card {
+  width: 120px;
+  border: 2px solid #333;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+  font-family: 'Nunito', sans-serif;
+  color: #111;
+}
+.prop-card .pc-color { height: 22px; }
+.prop-card .pc-photo { width: 100%; height: 70px; object-fit: cover; display: block; }
+.prop-card .pc-body { padding: 4px 6px; }
+.prop-card .pc-name { font-size: 8px; font-weight: 800; text-align: center; line-height: 1.3; }
+.prop-card .pc-price { font-size: 7px; color: #333; text-align: center; margin-top: 2px; }
+.prop-card .pc-rents { font-size: 6.5px; color: #444; padding: 3px 0 2px; }
+.prop-card .pc-rents div { display: flex; justify-content: space-between; }
+
+/* Money */
+.money-sheet { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+.money-note {
+  width: 160px; height: 72px;
+  border-radius: 6px;
+  border: 2px solid #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.4rem;
+  letter-spacing: 1px;
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+}
+.money-note .note-bg-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.25;
+}
+.money-note span { position: relative; z-index: 1; text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
+
+/* Chance / Community chest */
+.chance-card {
+  width: 130px; height: 90px;
+  border: 2px solid #333;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Nunito', sans-serif;
+  font-size: 7.5px;
+  font-weight: 700;
+  text-align: center;
+  padding: 6px;
+  background: #fff;
+  color: #111;
+  gap: 4px;
+}
+.chance-card .cc-title { font-size: 9px; font-weight: 800; color: var(--purple); }
+.chance-card .cc-photo { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1.5px solid #ccc; }
+
+/* ─── PRINT ─── */
+@media print {
+  body { background: #fff; color: #000; }
+  .site-header, .tab-bar, .box, .btn-primary { display: none !important; }
+  .panel { display: block !important; padding: 0; }
+  #print-dobble, #print-mono { display: block !important; }
+  .dobble-card { page-break-inside: avoid; }
+  .prop-card, .money-note, .chance-card { page-break-inside: avoid; }
+}
+
+/* helpers */
+.badge {
+  display: inline-block;
+  background: rgba(255,255,255,0.08);
+  border-radius: 50px;
+  padding: 3px 12px;
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.5);
+  margin-top: 10px;
+}
+.tip { font-size: 0.82rem; color: rgba(255,255,255,0.35); margin-top: 10px; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div class="site-header">
+  <h1>🎮 Our Friend Games</h1>
+  <p>Upload photos · Generate · Print</p>
+</div>
+
+<div class="tab-bar">
+  <button class="tab-btn active-dobble" onclick="showTab('dobble',this)">🎯 Dobble</button>
+  <button class="tab-btn" onclick="showTab('mono',this)">🏠 Monopoly</button>
+</div>
+
+<!-- ══════════ DOBBLE PANEL ══════════ -->
+<div class="panel active" id="panel-dobble">
+
+  <div class="box">
+    <h2 style="color:#ff8585">🎯 Dobble – 31 Cards, 6 Symbols Each</h2>
+    <p>Upload <strong>31 photos</strong> of your friends. The app will automatically place exactly 1 matching photo between any two cards — that's the Dobble magic! Then print and cut into circles.</p>
+    <div class="upload-zone" onclick="document.getElementById('dobble-input').click()">
+      <label class="upload-lbl">📷 Choose Photos</label>
+      <input type="file" id="dobble-input" multiple accept="image/*" onchange="loadDobblePhotos(this)">
+      <p>Select exactly 31 photos (JPG, PNG, etc.)</p>
+    </div>
+    <div class="thumb-grid" id="dobble-thumbs"></div>
+    <div class="photo-count" id="dobble-count"></div>
+    <p class="tip">💡 <strong>Tip:</strong> After generating, use your browser's Print function (Ctrl+P / Cmd+P). Set paper to A4, scale to fit. Cut the circles out with scissors!</p>
+  </div>
+
+  <button class="btn-primary" onclick="generateDobble()">✨ Generate 31 Cards!</button>
+
+  <div id="cards-output"></div>
+</div>
+
+<!-- ══════════ MONOPOLY PANEL ══════════ -->
+<div class="panel" id="panel-mono">
+
+  <div class="box">
+    <h2 style="color:#7ef9a0">🏠 Fantasy Monopoly – Friend Edition</h2>
+    <p>Upload photos of your friends to appear on property cards, money, chance cards and the board center. Upload as many as you like — they'll be spread across everything!</p>
+    <div class="upload-zone" onclick="document.getElementById('mono-input').click()">
+      <label class="upload-lbl">📷 Choose Friend Photos</label>
+      <input type="file" id="mono-input" multiple accept="image/*" onchange="loadMonoPhotos(this)">
+      <p>Upload any number of friend photos</p>
+    </div>
+    <div class="thumb-grid" id="mono-thumbs"></div>
+    <div class="photo-count" id="mono-count"></div>
+    <p class="tip">💡 <strong>Tip:</strong> Print on A3 or two A4 sheets for the board. Property + chance cards fit on A4. Cut and play!</p>
+  </div>
+
+  <button class="btn-primary green-btn" onclick="generateMono()">🎲 Generate Monopoly!</button>
+
+  <div id="mono-output"></div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════
+   STATE
+══════════════════════════════════════════ */
+let dobblePhotos = [];  // array of data-URLs (31 needed)
+let monoPhotos  = [];   // array of data-URLs (any number)
+
+/* ══════════════════════════════════════════
+   TAB SWITCHING
+══════════════════════════════════════════ */
+function showTab(name, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => { b.className = 'tab-btn'; });
+  document.getElementById('panel-' + name).classList.add('active');
+  btn.classList.add(name === 'dobble' ? 'active-dobble' : 'active-mono');
+}
+
+/* ══════════════════════════════════════════
+   PHOTO LOADING HELPERS
+══════════════════════════════════════════ */
+function readFiles(files) {
+  return Promise.all(Array.from(files).map(f => new Promise(res => {
+    const r = new FileReader();
+    r.onload = e => res(e.target.result);
+    r.readAsDataURL(f);
+  })));
+}
+
+async function loadDobblePhotos(inp) {
+  dobblePhotos = await readFiles(inp.files);
+  renderThumbs('dobble-thumbs', dobblePhotos);
+  const n = dobblePhotos.length;
+  document.getElementById('dobble-count').textContent =
+    n === 31 ? `✅ ${n} photos – perfect!` :
+    n < 31  ? `⚠️ ${n}/31 photos – need ${31 - n} more` :
+               `⚠️ ${n} photos – only first 31 will be used`;
+  if (n > 31) dobblePhotos = dobblePhotos.slice(0, 31);
+}
+
+async function loadMonoPhotos(inp) {
+  monoPhotos = await readFiles(inp.files);
+  renderThumbs('mono-thumbs', monoPhotos);
+  document.getElementById('mono-count').textContent = `✅ ${monoPhotos.length} photos loaded`;
+}
+
+function renderThumbs(id, photos) {
+  const g = document.getElementById(id);
+  g.innerHTML = '';
+  photos.forEach(src => {
+    const img = document.createElement('img');
+    img.src = src;
+    g.appendChild(img);
+  });
+}
+
+/* ══════════════════════════════════════════
+   DOBBLE MATH  (Projective Plane order 5)
+   31 cards, 6 symbols each, every pair shares exactly 1
+══════════════════════════════════════════ */
+function buildDobbleCards() {
+  const n = 5; // order
+  const cards = [];
+  // First card: symbols 0..4
+  cards.push([0,1,2,3,4,5]);
+  // n cards for each of n "point classes"
+  for (let i = 0; i < n; i++) {
+    const c = [i]; // first symbol is i (0-4)
+    for (let j = 0; j < n; j++) {
+      c.push(n + i * n + j);
+    }
+    cards.push(c);
+  }
+  // n*n cards
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      const c = [n + j]; // one of the n+1..2n symbols
+      for (let k = 0; k < n; k++) {
+        c.push(n + n + ((j + i * k) % n) + k * n);
+      }
+      cards.push(c);
+    }
+  }
+  return cards; // 31 cards, each with 6 symbol indices (0-30)
+}
+
+/* ══════════════════════════════════════════
+   DOBBLE GENERATOR
+══════════════════════════════════════════ */
+function generateDobble() {
+  if (dobblePhotos.length < 31) {
+    alert(`Please upload 31 photos! You have ${dobblePhotos.length}.`);
+    return;
+  }
+
+  const cards = buildDobbleCards();
+  const out = document.getElementById('cards-output');
+
+  // Shuffle photos for variety
+  const photos = [...dobblePhotos].sort(() => Math.random() - 0.5);
+
+  let html = `
+    <div style="margin-bottom:18px">
+      <p class="tip">🖨️ <strong>Print these cards:</strong> Press Ctrl+P (or Cmd+P), choose A4, "Fit to page". Cut along the circles.</p>
+    </div>
+    <div id="dobble-cards-wrap" style="background:#fff; padding:20px; border-radius:16px;">
+  `;
+
+  cards.forEach((symbolIndices, ci) => {
+    html += `<div class="dobble-card">`;
+    html += `<div class="dobble-card-inner">`;
+
+    // Place 6 symbols in a circle pattern
+    const positions = getCardPositions(symbolIndices.length);
+    symbolIndices.forEach((symIdx, si) => {
+      const pos = positions[si];
+      const size = pos.size;
+      html += `
+        <div class="dobble-sym" style="
+          left:${pos.x - size/2}px;
+          top:${pos.y - size/2}px;
+          width:${size}px; height:${size}px;">
+          <img src="${photos[symIdx % photos.length]}" alt="">
+        </div>`;
+    });
+    html += `</div></div>`;
+  });
+
+  html += `</div>`;
+  out.innerHTML = html;
+  out.scrollIntoView({ behavior: 'smooth' });
+}
+
+// Returns {x, y, size} for each of the 6 symbols on a 210x210 card
+function getCardPositions(count) {
+  const cx = 105, cy = 105;
+  // One in center, 5 around a ring, or 6 arranged
+  const configs = {
+    6: [
+      { x: 105, y: 55, size: 52 },
+      { x: 155, y: 88, size: 46 },
+      { x: 155, y: 138, size: 46 },
+      { x: 105, y: 165, size: 48 },
+      { x: 55, y: 138, size: 46 },
+      { x: 55, y: 88, size: 46 },
+    ]
+  };
+  return configs[count] || configs[6];
+}
+
+/* ══════════════════════════════════════════
+   MONOPOLY DATA
+══════════════════════════════════════════ */
+const MONO_COLORS = {
+  brown:   '#8B4513',
+  lblue:   '#87CEEB',
+  pink:    '#E91E8C',
+  orange:  '#FF9800',
+  red:     '#F44336',
+  yellow:  '#FFC107',
+  green:   '#4CAF50',
+  dblue:   '#1565C0',
+  station: '#555555',
+  utility: '#78909C',
+};
+
+const PROPERTIES = [
+  // bottom row (left to right)
+  { name:'Mystic Meadows',    price:60,  color:'brown',   rents:[2,10,30,90,160,250],  group:0 },
+  { name:'Enchanted Tax',     price:0,   color:'utility', rents:[],                     type:'tax',   tax:200, group:'tax' },
+  { name:'Shadow Vale',       price:60,  color:'brown',   rents:[4,20,60,180,320,450], group:0 },
+  { name:'Goblin Express',    price:200, color:'station', rents:[25,50,100,200],        type:'station', group:'st' },
+  { name:'Crystal Cove',      price:100, color:'lblue',   rents:[6,30,90,270,400,550], group:1 },
+  { name:'Dragon Keep',       price:100, color:'lblue',   rents:[6,30,90,270,400,550], group:1 },
+  { name:'Potion Brewery',    price:150, color:'utility', rents:[4,10],                 type:'utility', group:'u' },
+  { name:'Fairy Hollow',      price:120, color:'lblue',   rents:[8,40,100,300,450,600],group:1 },
+  // left column (top to bottom)
+  { name:'Wizard Tower',      price:140, color:'pink',    rents:[10,50,150,450,625,750],group:2 },
+  { name:'Phantom Peak',      price:140, color:'pink',    rents:[10,50,150,450,625,750],group:2 },
+  { name:'Rune Station',      price:200, color:'station', rents:[25,50,100,200],        type:'station', group:'st' },
+  { name:'Viper Glen',        price:160, color:'pink',    rents:[12,60,180,500,700,900],group:2 },
+  { name:'Curse Falls',       price:180, color:'orange',  rents:[14,70,200,550,750,950],group:3 },
+  { name:'Bone Harbour',      price:180, color:'orange',  rents:[14,70,200,550,750,950],group:3 },
+  { name:'Spectre Blvd',      price:200, color:'orange',  rents:[16,80,220,600,800,1000],group:3 },
+  // top row (right to left)
+  { name:'Storm Castle',      price:220, color:'red',     rents:[18,90,250,700,875,1050],group:4 },
+  { name:'Ice Dungeon',       price:220, color:'red',     rents:[18,90,250,700,875,1050],group:4 },
+  { name:'Chaos Rift',        price:240, color:'red',     rents:[20,100,300,750,925,1100],group:4 },
+  { name:'Void Station',      price:200, color:'station', rents:[25,50,100,200],         type:'station', group:'st' },
+  { name:'Lava Citadel',      price:260, color:'yellow',  rents:[22,110,330,800,975,1150],group:5 },
+  { name:'Thunder Grove',     price:260, color:'yellow',  rents:[22,110,330,800,975,1150],group:5 },
+  { name:'Magic Fountain',    price:150, color:'utility', rents:[4,10],                  type:'utility', group:'u' },
+  { name:'Aurora Palace',     price:280, color:'yellow',  rents:[24,120,360,850,1025,1200],group:5 },
+  // right column (bottom to top)
+  { name:'Titan Plains',      price:300, color:'green',   rents:[26,130,390,900,1100,1275],group:6 },
+  { name:'Obsidian Spire',    price:300, color:'green',   rents:[26,130,390,900,1100,1275],group:6 },
+  { name:'Nexus Station',     price:200, color:'station', rents:[25,50,100,200],          type:'station', group:'st' },
+  { name:'Eternity Bridge',   price:320, color:'green',   rents:[28,150,450,1000,1200,1400],group:6 },
+  { name:'Celestial Gate',    price:350, color:'dblue',   rents:[35,175,500,1100,1300,1500],group:7 },
+  { name:'Infinity Realm',    price:400, color:'dblue',   rents:[50,200,600,1400,1700,2000],group:7 },
+];
+
+const CHANCE_TEXTS = [
+  'Advance to Mystic Meadows',
+  'Bank pays you M50',
+  'Go to Jail. Do not pass GO.',
+  'Get out of Jail Free!',
+  'Advance to GO. Collect M200',
+  'Pay school fees M150',
+  'You win a beauty contest M10',
+  'Go back 3 spaces',
+  'Advance to nearest station',
+  'Building loan matures M150',
+  'Pay repairs on buildings',
+  'Collect M200 from the bank',
+  'Take a trip to Goblin Express',
+  'Your birthday! Each player gives you M10',
+  'You have been elected chairman',
+  'Advance to Infinity Realm',
+];
+
+const COMMUNITY_TEXTS = [
+  'Doctor\'s fees – pay M50',
+  'Bank error in your favour M200',
+  'Life insurance matures M100',
+  'Pay hospital fees M100',
+  'Go to Jail!',
+  'Receive interest M25',
+  'Grand Opera Night – collect M50',
+  'Holiday Fund matures M100',
+  'Income tax refund M20',
+  'Advance to GO',
+  'From sale of stock M50',
+  'Pay school fees M50',
+  'Get out of Jail Free!',
+  'Street repairs – M40 per house',
+  'You inherit M100',
+  'Second prize in beauty contest M10',
+];
+
+const MONEY_DENOMS = [
+  { val: 1,   color: '#a8d5a2', count: 30 },
+  { val: 5,   color: '#f7c59f', count: 20 },
+  { val: 10,  color: '#87ceeb', count: 20 },
+  { val: 20,  color: '#f4acb7', count: 20 },
+  { val: 50,  color: '#ffd166', count: 16 },
+  { val: 100, color: '#bde0fe', count: 12 },
+  { val: 500, color: '#caffbf', count: 10 },
+];
+
+/* ══════════════════════════════════════════
+   MONOPOLY GENERATOR
+══════════════════════════════════════════ */
+function generateMono() {
+  if (monoPhotos.length === 0) {
+    alert('Please upload some friend photos first!');
+    return;
+  }
+
+  const photos = [...monoPhotos];
+  const rnd = () => photos[Math.floor(Math.random() * photos.length)];
+  const out = document.getElementById('mono-output');
+
+  /* ── BOARD ── */
+  let boardHtml = buildBoard(photos);
+
+  /* ── PROPERTY CARDS ── */
+  let propHtml = `<div class="mono-section-title">🏠 Property Cards</div>`;
+  propHtml += `<div class="prop-cards-grid">`;
+  PROPERTIES.forEach(p => {
+    if (p.type === 'tax') return;
+    propHtml += buildPropCard(p, rnd());
+  });
+  propHtml += `</div>`;
+
+  /* ── CHANCE CARDS ── */
+  let chanceHtml = `<div class="mono-section-title">❓ Chance Cards</div>`;
+  chanceHtml += `<div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;">`;
+  CHANCE_TEXTS.forEach(text => {
+    chanceHtml += buildChanceCard(text, rnd(), '#f4d35e', 'CHANCE');
+  });
+  chanceHtml += `</div>`;
+
+  /* ── COMMUNITY CHEST ── */
+  let commHtml = `<div class="mono-section-title">🎁 Community Chest Cards</div>`;
+  commHtml += `<div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;">`;
+  COMMUNITY_TEXTS.forEach(text => {
+    commHtml += buildChanceCard(text, rnd(), '#a8dadc', 'COMMUNITY');
+  });
+  commHtml += `</div>`;
+
+  /* ── MONEY ── */
+  let moneyHtml = `<div class="mono-section-title">💰 Money Sheets</div>`;
+  moneyHtml += `<div class="money-sheet">`;
+  MONEY_DENOMS.forEach(d => {
+    for (let i = 0; i < Math.min(d.count, 4); i++) {
+      moneyHtml += buildMoney(d, rnd());
+    }
+    moneyHtml += `<div style="width:100%;font-size:0.75rem;color:rgba(255,255,255,0.3);margin:-4px 0 4px">Print x${d.count} of M${d.val}</div>`;
+  });
+  moneyHtml += `</div>`;
+
+  out.innerHTML = `
+    <div style="background:#fff;border-radius:16px;padding:24px;margin-top:8px;overflow-x:auto;">
+      <div style="color:#111;font-family:'Fredoka One',cursive;font-size:1.8rem;text-align:center;margin-bottom:20px;color:#1a5e20;">
+        🗺️ Fantasy Monopoly Board
+      </div>
+      ${boardHtml}
+    </div>
+    <div style="background:var(--card);border-radius:16px;padding:24px;margin-top:16px;overflow-x:auto;">
+      ${propHtml}
+      ${chanceHtml}
+      ${commHtml}
+      ${moneyHtml}
+    </div>
+  `;
+  out.scrollIntoView({ behavior: 'smooth' });
+}
+
+function buildBoard(photos) {
+  const rnd = () => photos[Math.floor(Math.random() * photos.length)];
+  const p = PROPERTIES;
+  const colorOf = name => MONO_COLORS[name] || '#999';
+
+  // Build the 11x11 grid cells manually
+  // Rows: 0=top, 10=bottom. Cols: 0=left, 10=right.
+  // We'll build cell data for the ring:
+  // Bottom row (row 10): col 0-10 = cells 0..10 (left=Go, right=Just Visiting)
+  // Left col (col 0): row 9..1
+  // Top row (row 0): col 0..10
+  // Right col (col 10): row 1..9
+
+  function corner(label, emoji) {
+    return `<div class="mono-cell mono-corner" style="background:#e8f5d4;font-size:10px;text-align:center;padding:4px;">${emoji}<br>${label}</div>`;
+  }
+
+  function propCell(prop, photo) {
+    const c = colorOf(prop.color);
+    const isStation = prop.type === 'station';
+    const isUtil = prop.type === 'utility';
+    let inner = '';
+    if (photo && !isStation && !isUtil) {
+      inner = `<div class="color-bar" style="background:${c}"></div>
+               <img class="cell-photo" src="${photo}" alt="">
+               <div class="cell-name">${prop.name}</div>
+               <div class="cell-price">M${prop.price}</div>`;
+    } else {
+      inner = `<div class="color-bar" style="background:${c}"></div>
+               <div class="cell-name" style="font-size:7px;padding:4px;">${prop.name}</div>
+               <div class="cell-price">M${prop.price || ''}</div>`;
+    }
+    return `<div class="mono-cell">${inner}</div>`;
+  }
+
+  function specialCell(label, emoji, bg='#e8f5d4') {
+    return `<div class="mono-cell" style="background:${bg};font-size:8px;font-weight:800;gap:2px;">${emoji}<br>${label}</div>`;
+  }
+
+  // All 28 perimeter property-like cells (excluding corners)
+  // Bottom: indices 1-9 (left to right), Go at col0, Visit at col10
+  // Left: indices 0-7 going up
+  // Top: indices going right
+  // Right: going down
+  const bottomProps = [p[0], null, p[1], p[2], p[3], p[4], null, p[5], p[6]]; // 9 cells
+  const leftProps   = [p[7], p[8], null, p[9], p[10], p[11], p[12], null, p[13]]; // 9 cells
+  const topProps    = [p[14], p[15], p[16], null, p[17], p[18], p[19], null, p[20]]; // 9 cells
+  const rightProps  = [p[21], null, p[22], p[23], p[24], null, p[25], p[26], p[27]]; // 9 cells
+
+  let html = `<div class="mono-board">`;
+
+  // Row 0: top-left corner + top row (right to left on board = left to right in grid reversed) + top-right corner
+  html += corner('Free\nParking','🅿️');
+  for (let i = topProps.length - 1; i >= 0; i--) {
+    const pr = topProps[i];
+    html += pr ? propCell(pr, rnd()) : specialCell('Community\nChest','🎁');
+  }
+  html += corner('Go to\nJail','🚔');
+
+  // Rows 1-9: left col + center + right col
+  for (let r = 0; r < 9; r++) {
+    // Left cell
+    const lp = leftProps[leftProps.length - 1 - r];
+    html += lp ? propCell(lp, rnd()) : specialCell('Chance','❓','#fff9c4');
+
+    // Center (spans 9x9, only output on first row)
+    if (r === 0) {
+      let friendFaces = '';
+      monoPhotos.forEach(src => {
+        friendFaces += `<img src="${src}" alt="">`;
+      });
+      html += `<div class="mono-center" style="grid-column:2/11;grid-row:2/11;">
+        <h2>FANTASY<br>MONOPOLY</h2>
+        <p>Friend Edition ✨</p>
+        <div class="friend-faces">${friendFaces}</div>
+      </div>`;
+    }
+
+    // Right cell
+    const rp = rightProps[r];
+    html += rp ? propCell(rp, rnd()) : specialCell('Chance','❓','#fff9c4');
+  }
+
+  // Row 10: bottom row
+  html += corner('Just\nVisiting','👀');
+  bottomProps.forEach(pr => {
+    html += pr ? propCell(pr, rnd()) : specialCell('Community\nChest','🎁');
+  });
+  html += corner('GO','🏁');
+
+  html += `</div>`;
+  return html;
+}
+
+function buildPropCard(prop, photo) {
+  const c = MONO_COLORS[prop.color] || '#999';
+  const isStation = prop.type === 'station';
+  const isUtil = prop.type === 'utility';
+  let rentRows = '';
+  if (!isStation && !isUtil && prop.rents.length > 0) {
+    const labels = ['Site','1 house','2 houses','3 houses','4 houses','Hotel'];
+    prop.rents.forEach((r, i) => {
+      rentRows += `<div><span>${labels[i]}</span><span>M${r}</span></div>`;
+    });
+  } else if (isStation) {
+    rentRows = `<div><span>1 stn</span><span>M25</span></div>
+                <div><span>2 stns</span><span>M50</span></div>
+                <div><span>3 stns</span><span>M100</span></div>
+                <div><span>4 stns</span><span>M200</span></div>`;
+  } else if (isUtil) {
+    rentRows = `<div><span>1 utility</span><span>4× dice</span></div>
+                <div><span>2 utilities</span><span>10× dice</span></div>`;
+  }
+  return `
+  <div class="prop-card">
+    <div class="pc-color" style="background:${c}"></div>
+    <img class="pc-photo" src="${photo}" alt="">
+    <div class="pc-body">
+      <div class="pc-name">${prop.name}</div>
+      <div class="pc-price">M${prop.price}</div>
+      <div class="pc-rents">${rentRows}</div>
+    </div>
+  </div>`;
+}
+
+function buildChanceCard(text, photo, bgColor, title) {
+  return `
+  <div class="chance-card" style="background:${bgColor}20;border-color:${bgColor};">
+    <div class="cc-title">${title}</div>
+    <img class="cc-photo" src="${photo}" alt="">
+    <div>${text}</div>
+  </div>`;
+}
+
+function buildMoney(denom, photo) {
+  const darken = (hex, amt) => {
+    let r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    return `rgb(${Math.max(0,r-amt)},${Math.max(0,g-amt)},${Math.max(0,b-amt)})`;
+  };
+  const textColor = darken(denom.color, 80);
+  return `
+  <div class="money-note" style="background:${denom.color};color:${textColor};border-color:${darken(denom.color,40)};">
+    <img class="note-bg-photo" src="${photo}" alt="">
+    <span>M${denom.val}</span>
+  </div>`;
+}
+</script>
+</body>
+</html>
