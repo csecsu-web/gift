@@ -3,46 +3,59 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Game Generator</title>
+<title>Realm Forge — Custom Printable Game Generator</title>
+<meta name="description" content="Realm Forge lets you create custom printable card games and board games using your own images. Generate Spottix matching cards and Goldpath board games instantly — free, no signup.">
+<meta name="keywords" content="custom card game generator, printable board game, custom matching card game, spot it maker, monopoly board maker, print and play, custom game creator">
+<meta property="og:title" content="Realm Forge — Custom Printable Game Generator">
+<meta property="og:description" content="Upload your own images and generate custom printable card games and board games in seconds. Free to use, no signup required.">
+<meta property="og:type" content="website">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family:Arial, sans-serif; background:#f0f2f5; min-height:100vh; display:flex; align-items:center; justify-content:center; }
-  .page { text-align:center; padding:40px 20px; }
-  h1 { font-size:2.5em; color:#333; margin-bottom:10px; }
-  p { color:#666; font-size:1.1em; margin-bottom:50px; }
+  .page { text-align:center; padding:40px 20px; max-width:800px; margin:0 auto; }
+  h1 { font-size:2.8em; color:#2c2c54; margin-bottom:8px; }
+  .tagline { color:#666; font-size:1.1em; margin-bottom:8px; }
+  .sub { color:#999; font-size:0.9em; margin-bottom:50px; }
   .cards { display:flex; gap:30px; justify-content:center; flex-wrap:wrap; }
-  .card { background:white; border-radius:16px; padding:40px 32px; width:260px; box-shadow:0 4px 20px rgba(0,0,0,0.1); text-decoration:none; color:inherit; transition:transform 0.2s, box-shadow 0.2s; display:block; }
+  .card { background:white; border-radius:16px; padding:40px 32px; width:280px; box-shadow:0 4px 20px rgba(0,0,0,0.1); text-decoration:none; color:inherit; transition:transform 0.2s, box-shadow 0.2s; display:block; }
   .card:hover { transform:translateY(-6px); box-shadow:0 10px 30px rgba(0,0,0,0.15); }
   .icon { font-size:3em; margin-bottom:16px; }
-  .card h2 { font-size:1.4em; color:#333; margin-bottom:10px; }
-  .card p { color:#777; font-size:0.95em; margin:0; }
-  .badge { display:inline-block; margin-top:16px; padding:6px 14px; border-radius:20px; font-size:0.85em; font-weight:bold; }
+  .card h2 { font-size:1.5em; color:#2c2c54; margin-bottom:6px; }
+  .card .subtitle { font-size:0.85em; color:#999; margin-bottom:12px; font-style:italic; }
+  .card p { color:#777; font-size:0.95em; margin:0; line-height:1.5; }
+  .badge { display:inline-block; margin-top:16px; padding:6px 14px; border-radius:20px; font-size:0.82em; font-weight:bold; }
   .badge-purple { background:#ede9ff; color:#5a3ecb; }
   .badge-green { background:#e6f9ef; color:#1e8449; }
+  footer { margin-top:50px; color:#bbb; font-size:0.8em; }
 </style>
 </head>
 <body>
 <div class="page">
-  <h1>🎮 Game Generator</h1>
-  <p>Create custom printable games with your own images</p>
+  <h1>⚔️ Realm Forge</h1>
+  <p class="tagline">Custom printable games — made with your own images</p>
+  <p class="sub">Free to use · No signup · Print at home</p>
 
   <div class="cards">
-    <a href="doblet.html" class="card">
+    <a href="spottix.html" class="card">
       <div class="icon">🎯</div>
-      <h2>Doblet</h2>
-      <p>Upload 31 images and generate 31 cards where every pair shares exactly 1 symbol</p>
-      <div class="badge badge-purple">31 cards · PDF download</div>
+      <h2>Spottix</h2>
+      <div class="subtitle">The symbol matching card game</div>
+      <p>Upload 31 images and instantly generate 31 cards where every pair of cards shares exactly one matching symbol.</p>
+      <div class="badge badge-purple">31 cards · Print ready · A4</div>
     </a>
 
-    <a href="monopoly.html" class="card">
+    <a href="goldpath.html" class="card">
       <div class="icon">🎲</div>
-      <h2>Monopoly</h2>
-      <p>Upload 28 images and generate a full custom Monopoly board ready to print</p>
-      <div class="badge badge-green">28 spaces · PDF download</div>
+      <h2>Goldpath</h2>
+      <div class="subtitle">The custom property board game</div>
+      <p>Upload 28 images, name your spaces, and generate a full custom board game ready to print and play.</p>
+      <div class="badge badge-green">28 spaces · 2 pages · A4</div>
     </a>
   </div>
+
+  <footer>
+    <p>Realm Forge · All games are original creations · No trademarked names or designs used</p>
+  </footer>
 </div>
 </body>
 </html>
-```
-
