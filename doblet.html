@@ -15,6 +15,9 @@
   .thumb { width:50px; height:50px; border-radius:5px; object-fit:cover; border:2px solid #ddd; }
   .count { font-size:14px; color:#666; margin-bottom:16px; }
   .count span { font-weight:bold; color:#5a3ecb; }
+  .row { display:flex; align-items:center; gap:16px; margin-bottom:16px; flex-wrap:wrap; }
+  .row label { margin:0; white-space:nowrap; }
+  select { padding:8px 12px; border:1px solid #ccc; border-radius:8px; font-size:14px; }
   .btns { display:flex; gap:10px; flex-wrap:wrap; }
   button { padding:12px 24px; border:none; border-radius:8px; font-size:15px; font-weight:bold; cursor:pointer; }
   .btn-gen { background:#5a3ecb; color:white; }
@@ -22,18 +25,25 @@
   .btn-clear { background:#e74c3c; color:white; }
   .error { background:#ffe0e0; color:#c0392b; padding:12px; border-radius:8px; margin-top:12px; display:none; }
   #cards-section { display:none; }
-  #cards-section h2 { text-align:center; color:#333; margin-bottom:16px; }
-  .cards-grid { display:grid; grid-template-columns:repeat(3, 220px); gap:20px; justify-content:center; }
 
+  /* SCREEN preview */
+  .cards-grid {
+    display:grid;
+    grid-template-columns: repeat(var(--cols), var(--card-size));
+    gap:16px;
+    justify-content:center;
+    padding:10px;
+  }
   .card {
-    width:220px; height:220px;
+    width:var(--card-size);
+    height:var(--card-size);
     border:3px solid #333;
     border-radius:50%;
     display:grid;
     grid-template-columns:repeat(3,1fr);
     grid-template-rows:repeat(2,1fr);
     gap:4px;
-    padding:16px;
+    padding:14px;
     background:white;
     position:relative;
   }
@@ -45,14 +55,32 @@
     border-radius:10px; font-size:11px; font-weight:bold; white-space:nowrap;
   }
 
+  /* PRINT */
   @media print {
-    body { background:white; padding:0; margin:0; }
-    .panel:first-child { display:none !important; }
+    body { background:white; margin:0; padding:0; }
+    .panel { display:none !important; }
     #cards-section { display:block !important; }
-    #cards-section h2 { display:none; }
-    .cards-grid { grid-template-columns:repeat(3, 200px); gap:15px; padding:10px; }
-    .card { width:200px; height:200px; page-break-inside:avoid; }
-    .btn-print { display:none !important; }
+
+    .cards-grid {
+      display:grid !important;
+      grid-template-columns: repeat(var(--print-cols), 1fr) !important;
+      gap:8mm !important;
+      padding:8mm !important;
+      width:210mm;
+      box-sizing:border-box;
+    }
+
+    .card {
+      width:auto !important;
+      height:auto !important;
+      aspect-ratio:1;
+      border-radius:50%;
+      padding:10px;
+    }
+    .card-num { display:none; }
+
+    /* page break every N cards */
+    .page-break { page-break-after:always; display:block; }
   }
 </style>
 </head>
@@ -60,10 +88,21 @@
 
 <div class="panel">
   <h1>🎯 Doblet Card Generator</h1>
+
   <label>Upload your 31 images:</label>
   <input type="file" id="img-input" multiple accept="image/*">
   <div class="thumbs" id="thumbs"></div>
   <div class="count">Images loaded: <span id="img-count">0</span> / 31</div>
+
+  <div class="row">
+    <label>Cards per page:</label>
+    <select id="per-page" onchange="updateLayout()">
+      <option value="4">4 per page (2×2 — large)</option>
+      <option value="6" selected>6 per page (2×3 — medium)</option>
+      <option value="9">9 per page (3×3 — small)</option>
+    </select>
+  </div>
+
   <div class="btns">
     <button class="btn-gen" onclick="generate()">Generate 31 Cards</button>
     <button class="btn-print" id="print-btn" onclick="window.print()">Print / Save as PDF</button>
@@ -72,46 +111,74 @@
   <div class="error" id="error-msg"></div>
 </div>
 
-<div id="cards-section" class="panel">
-  <h2>Your 31 Doblet Cards</h2>
+<div id="cards-section">
   <div class="cards-grid" id="cards-grid"></div>
 </div>
 
 <script>
 let images = [];
 let loadedCount = 0;
+let generated = false;
+
+const CONFIG = {
+  4:  { cols: 2, printCols: 2, cardSize: '260px' },
+  6:  { cols: 2, printCols: 2, cardSize: '220px' },
+  9:  { cols: 3, printCols: 3, cardSize: '170px' },
+};
+
+function updateLayout() {
+  if (!generated) return;
+  applyConfig();
+}
+
+function applyConfig() {
+  const perPage = parseInt(document.getElementById('per-page').value);
+  const cfg = CONFIG[perPage];
+  const grid = document.getElementById('cards-grid');
+  grid.style.setProperty('--cols', cfg.cols);
+  grid.style.setProperty('--card-size', cfg.cardSize);
+  grid.style.setProperty('--print-cols', cfg.printCols);
+
+  // Insert page breaks
+  const cards = grid.querySelectorAll('.card, .page-break');
+  cards.forEach(el => { if (el.classList.contains('page-break')) el.remove(); });
+
+  const allCards = grid.querySelectorAll('.card');
+  allCards.forEach((card, i) => {
+    if ((i + 1) % perPage === 0 && i !== allCards.length - 1) {
+      const br = document.createElement('div');
+      br.className = 'page-break';
+      br.style.gridColumn = '1 / -1';
+      card.after(br);
+    }
+  });
+}
 
 function resizeImage(src, size, callback) {
   const img = new Image();
   img.onload = () => {
     const canvas = document.createElement('canvas');
-    canvas.width = size;
-    canvas.height = size;
+    canvas.width = size; canvas.height = size;
     canvas.getContext('2d').drawImage(img, 0, 0, size, size);
-    callback(canvas.toDataURL('image/jpeg', 0.7));
+    callback(canvas.toDataURL('image/jpeg', 0.75));
   };
   img.src = src;
 }
 
 document.getElementById('img-input').addEventListener('change', function(e) {
-  images = [];
-  loadedCount = 0;
+  images = []; loadedCount = 0;
   document.getElementById('thumbs').innerHTML = '';
   document.getElementById('img-count').textContent = '0';
 
-  const files = Array.from(e.target.files);
-
-  files.forEach((file, i) => {
+  Array.from(e.target.files).forEach((file, i) => {
     const reader = new FileReader();
     reader.onload = ev => {
-      resizeImage(ev.target.result, 120, (small) => {
+      resizeImage(ev.target.result, 150, small => {
         images[i] = small;
         loadedCount++;
         document.getElementById('img-count').textContent = loadedCount;
-
         const img = document.createElement('img');
-        img.className = 'thumb';
-        img.src = small;
+        img.className = 'thumb'; img.src = small;
         document.getElementById('thumbs').appendChild(img);
       });
     };
@@ -125,13 +192,11 @@ function generateCards() {
   const first = [];
   for (let i = 0; i <= n; i++) first.push(i);
   cards.push(first);
-
   for (let r = 0; r < n; r++) {
     const card = [0];
     for (let c = 0; c < n; c++) card.push(n + 1 + r * n + c);
     cards.push(card);
   }
-
   for (let r = 0; r < n; r++) {
     for (let c = 0; c < n; c++) {
       const card = [r + 1];
@@ -145,7 +210,6 @@ function generateCards() {
 function generate() {
   const errEl = document.getElementById('error-msg');
   errEl.style.display = 'none';
-
   const filled = images.filter(Boolean).length;
   if (filled < 31) {
     errEl.textContent = `Need 31 images. You have ${filled}.`;
@@ -156,40 +220,37 @@ function generate() {
   const cards = generateCards();
   const grid = document.getElementById('cards-grid');
   grid.innerHTML = '';
-
   const fragment = document.createDocumentFragment();
 
   cards.forEach((card, idx) => {
     const cardEl = document.createElement('div');
     cardEl.className = 'card';
-
     const numEl = document.createElement('div');
     numEl.className = 'card-num';
     numEl.textContent = '#' + (idx + 1);
     cardEl.appendChild(numEl);
-
     card.forEach(symIdx => {
       const sym = document.createElement('div');
       sym.className = 'symbol';
       const imgEl = document.createElement('img');
       imgEl.src = images[symIdx];
-      imgEl.loading = 'lazy';
       sym.appendChild(imgEl);
       cardEl.appendChild(sym);
     });
-
     fragment.appendChild(cardEl);
   });
 
   grid.appendChild(fragment);
+  generated = true;
+  applyConfig();
+
   document.getElementById('cards-section').style.display = 'block';
   document.getElementById('print-btn').style.display = 'inline-block';
   document.getElementById('cards-section').scrollIntoView({ behavior: 'smooth' });
 }
 
 function clearAll() {
-  images = [];
-  loadedCount = 0;
+  images = []; loadedCount = 0; generated = false;
   document.getElementById('img-input').value = '';
   document.getElementById('thumbs').innerHTML = '';
   document.getElementById('img-count').textContent = '0';
