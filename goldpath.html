@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Goldpath — Custom Property Board Game Generator | Realm Forge</title>
+<meta name="description" content="Create your own Goldpath property board game with custom images and space names. Prints across 2 A4 pages — tape together and play. Free, instant, no signup needed.">
+<meta name="keywords" content="custom board game generator, printable property game, monopoly maker, custom board game creator, print and play board game, personalised board game">
+<meta property="og:title" content="Goldpath — Custom Property Board Game Generator">
+<meta property="og:description" content="Upload 28 images, name your spaces, and print your own custom property board game on 2 A4 sheets.">
+<meta property="og:type" content="website">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:Arial, sans-serif; background:#f0f2f5; padding:20px; }
+  .panel { background:white; border-radius:10px; padding:24px; max-width:700px; margin:0 auto 20px; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+  .back { display:inline-block; margin-bottom:16px; color:#27ae60; font-weight:bold; text-decoration:none; font-size:14px; }
+  .back:hover { text-decoration:underline; }
+  h1 { color:#1a5e1a; margin-bottom:4px; }
+  .subtitle { color:#999; font-size:0.9em; font-style:italic; margin-bottom:20px; }
+  label { font-weight:bold; display:block; margin-bottom:6px; color:#444; font-size:14px; }
+  input[type=file] { width:100%; padding:10px; border:2px dashed #aaa; border-radius:8px; margin-bottom:12px; cursor:pointer; }
+  input[type=text] { width:100%; padding:10px; border:1px solid #ccc; border-radius:8px; font-size:14px; margin-bottom:16px; }
+  .thumbs { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
+  .thumb { width:50px; height:50px; border-radius:5px; object-fit:cover; border:2px solid #ddd; }
+  .count { font-size:13px; color:#666; margin-bottom:16px; }
+  .count span { font-weight:bold; color:#27ae60; }
+  .btns { display:flex; gap:10px; flex-wrap:wrap; }
+  button { padding:12px 24px; border:none; border-radius:8px; font-size:15px; font-weight:bold; cursor:pointer; }
+  .btn-gen { background:#27ae60; color:white; }
+  .btn-print { background:#2980b9; color:white; display:none; }
+  .btn-clear { background:#e74c3c; color:white; }
+  .error { background:#ffe0e0; color:#c0392b; padding:12px; border-radius:8px; margin-top:12px; display:none; }
+  .how { background:#f0fff4; border-left:4px solid #27ae60; padding:14px 16px; border-radius:0 8px 8px 0; margin-bottom:20px; font-size:14px; color:#444; line-height:1.6; }
+  .slot-order { background:#fffbea; border:1px solid #f0c040; border-radius:8px; padding:12px 16px; margin-bottom:16px; font-size:13px; color:#555; line-height:1.7; }
+
+  /* Size controls */
+  .size-controls {
+    background:#f8fff8;
+    border:1px solid #c3e6cb;
+    border-radius:8px;
+    padding:14px 16px;
+    margin-bottom:16px;
+    display:none;
+  }
+  .size-controls h3 { font-size:14px; color:#444; margin-bottom:12px; }
+  .slider-row { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+  .slider-row label { font-size:13px; color:#555; font-weight:normal; min-width:140px; margin:0; }
+  input[type=range] { flex:1; cursor:pointer; }
+  .slider-val { font-size:13px; font-weight:bold; color:#27ae60; min-width:40px; text-align:right; }
+  .fit-toggle { display:flex; gap:8px; align-items:center; margin-top:4px; }
+  .fit-toggle label { font-size:13px; color:#555; font-weight:normal; margin:0; cursor:pointer; }
+  .fit-toggle input { cursor:pointer; }
+
+  #board-section { display:none; }
+
+  /* ── BOARD ── */
+  .board-half { width:100%; max-width:800px; background:white; margin:0 auto 20px; overflow:hidden; border:1px solid #ccc; }
+  .half-label { text-align:center; font-weight:bold; font-size:15px; color:#555; padding:10px; background:#f0f2f5; border-bottom:2px solid #ddd; }
+
+  .half-grid { display:grid; padding:6mm; gap:0; }
+  .top-grid {
+    grid-template-columns: var(--corner-size) repeat(6, var(--space-size)) var(--corner-size);
+    grid-template-rows: var(--corner-size) repeat(3, var(--space-size));
+  }
+  .bot-grid {
+    grid-template-columns: var(--corner-size) repeat(6, var(--space-size)) var(--space-size);
+    grid-template-rows: repeat(3, var(--space-size)) var(--corner-size);
+  }
+
+  .space {
+    border:1px solid #888;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    overflow:hidden;
+    background:white;
+  }
+
+  /* Image wrapper keeps fixed square ratio */
+  .space .img-wrap {
+    width:100%;
+    /* height set proportionally via JS or CSS var */
+    flex-shrink:0;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#f0f0f0;
+  }
+  .space .img-wrap img {
+    width:100%;
+    height:100%;
+    display:block;
+  }
+  .space .img-wrap img.fit-contain { object-fit:contain; }
+  .space .img-wrap img.fit-cover   { object-fit:cover; }
+
+  .space-name { font-size:5.5px; text-align:center; color:#222; padding:1px 2px; line-height:1.3; word-break:break-word; width:100%; }
+
+  .corner {
+    border:1px solid #555;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    background:#c8f7c5;
+  }
+  .corner .img-wrap {
+    width:75%;
+    aspect-ratio:1;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .corner .img-wrap img {
+    width:100%;
+    height:100%;
+    display:block;
+  }
+  .corner .img-wrap img.fit-contain { object-fit:contain; }
+  .corner .img-wrap img.fit-cover   { object-fit:cover; }
+
+  .corner-name { font-size:7px; font-weight:bold; text-align:center; color:#1a5e1a; margin-top:3px; padding:0 2px; }
+
+  .side-filler {
+    background:#e8f5e9; border:1px solid #aaa;
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px; font-weight:bold; color:#1a5e1a; text-align:center;
+    flex-direction:column; gap:4px;
+  }
+  .side-filler small { font-size:10px; font-weight:normal; color:#4a8f4a; }
+
+  @media print {
+    body { background:white; margin:0; padding:0; }
+    .panel { display:none !important; }
+    .size-controls { display:none !important; }
+    #board-section { display:block !important; }
+    .half-label { display:none; }
+    .board-half { width:210mm; max-width:none; margin:0; page-break-after:always; border:none; }
+    .board-half:last-child { page-break-after:avoid; }
+    .half-grid { padding:4mm; }
+    .top-grid {
+      grid-template-columns: 25mm repeat(6,16mm) 25mm !important;
+      grid-template-rows: 25mm repeat(3,16mm) !important;
+    }
+    .bot-grid {
+      grid-template-columns: 25mm repeat(6,16mm) 25mm !important;
+      grid-template-rows: repeat(3,16mm) 25mm !important;
+    }
+    .space-name { font-size:5px; }
+    .corner-name { font-size:6px; }
+    .side-filler { font-size:12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="panel">
+  <a class="back" href="index.html">← Back to Realm Forge</a>
+  <h1>🎲 Goldpath</h1>
+  <p class="subtitle">The custom property board game</p>
+
+  <div class="how">
+    <strong>How it works:</strong> Upload 28 images and optionally name each space. Goldpath generates your board across 2 A4 pages — print both, tape them together, and play!
+  </div>
+
+  <label>Upload 28 images:</label>
+  <div class="slot-order">
+    <strong>Image upload order (clockwise from bottom-right):</strong><br>
+    1 = Bottom-right corner · 2–7 = Bottom row (right → left) · 8 = Bottom-left corner<br>
+    9–14 = Left side (bottom → top) · 15 = Top-left corner<br>
+    16–21 = Top row (left → right) · 22 = Top-right corner · 23–28 = Right side (top → bottom)
+  </div>
+  <input type="file" id="img-input" multiple accept="image/*">
+  <div class="thumbs" id="thumbs"></div>
+  <div class="count">Images loaded: <span id="img-count">0</span> / 28</div>
+
+  <label>Space names — 28 comma-separated (optional):</label>
+  <input type="text" id="names-input" placeholder="Golden Gate, Silver Road, Dragon Keep, ...">
+
+  <!-- Size controls shown after generation -->
+  <div class="size-controls" id="size-controls">
+    <h3>🖼️ Image Display Settings</h3>
+    <div class="slider-row">
+      <label>Image height in space:</label>
+      <input type="range" id="img-height" min="20" max="90" value="60" oninput="applyImgHeight(this.value)">
+      <span class="slider-val" id="img-height-val">60%</span>
+    </div>
+    <div class="fit-toggle">
+      <span style="font-size:13px;color:#555;min-width:140px;">Image fit:</span>
+      <input type="radio" name="fit" id="fit-cover" value="cover" checked onchange="applyFit('cover')">
+      <label for="fit-cover">Crop to fill (no gaps)</label>
+      &nbsp;&nbsp;
+      <input type="radio" name="fit" id="fit-contain" value="contain" onchange="applyFit('contain')">
+      <label for="fit-contain">Show full image</label>
+    </div>
+  </div>
+
+  <div class="btns">
+    <button class="btn-gen" onclick="generate()">Generate Board</button>
+    <button class="btn-print" id="print-btn" onclick="window.print()">Print / Save as PDF</button>
+    <button class="btn-clear" onclick="clearAll()">Clear</button>
+  </div>
+  <div class="error" id="error-msg"></div>
+</div>
+
+<div id="board-section">
+  <div class="board-half">
+    <div class="half-label">Page 1 — Top half (print this first)</div>
+    <div class="half-grid top-grid" id="top-grid"></div>
+  </div>
+  <div class="board-half">
+    <div class="half-label">Page 2 — Bottom half (tape to page 1)</div>
+    <div class="half-grid bot-grid" id="bot-grid"></div>
+  </div>
+</div>
+
+<script>
+let images = [];
+let loadedCount = 0;
+let currentFit = 'cover';
+let currentImgHeight = 60;
+
+function resizeImage(src, size, callback) {
+  const img = new Image();
+  img.onload = () => {
+    const c = document.createElement('canvas');
+    c.width = size; c.height = size;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, size, size);
+    const ratio = Math.min(size / img.width, size / img.height);
+    const w = img.width * ratio;
+    const h = img.height * ratio;
+    ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
+    callback(c.toDataURL('image/jpeg', 0.8));
+  };
+  img.src = src;
+}
+
+document.getElementById('img-input').addEventListener('change', function(e) {
+  images = []; loadedCount = 0;
+  document.getElementById('thumbs').innerHTML = '';
+  document.getElementById('img-count').textContent = '0';
+  Array.from(e.target.files).forEach((file, i) => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      resizeImage(ev.target.result, 200, small => {
+        images[i] = small;
+        loadedCount++;
+        document.getElementById('img-count').textContent = loadedCount;
+        const img = document.createElement('img');
+        img.className = 'thumb'; img.src = small;
+        document.getElementById('thumbs').appendChild(img);
+      });
+    };
+    reader.readAsDataURL(file);
+  });
+});
+
+function applyFit(mode) {
+  currentFit = mode;
+  document.querySelectorAll('.img-wrap img').forEach(img => {
+    img.className = 'fit-' + mode;
+  });
+}
+
+function applyImgHeight(val) {
+  currentImgHeight = parseInt(val);
+  document.getElementById('img-height-val').textContent = val + '%';
+  document.querySelectorAll('.space .img-wrap').forEach(wrap => {
+    wrap.style.height = val + '%';
+  });
+}
+
+function makeSpace(imgSrc, name, isCorner) {
+  const el = document.createElement('div');
+  el.className = isCorner ? 'corner' : 'space';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'img-wrap';
+
+  if (!isCorner) {
+    // For regular spaces, height is a percentage of the cell
+    wrap.style.height = currentImgHeight + '%';
+  }
+
+  if (imgSrc) {
+    const img = document.createElement('img');
+    img.src = imgSrc;
+    img.alt = '';
+    img.className = 'fit-' + currentFit;
+    wrap.appendChild(img);
+  }
+  el.appendChild(wrap);
+
+  const label = document.createElement('div');
+  label.className = isCorner ? 'corner-name' : 'space-name';
+  label.textContent = name || '';
+  el.appendChild(label);
+
+  return el;
+}
+
+function makeFiller(title, sub) {
+  const el = document.createElement('div');
+  el.className = 'side-filler';
+  el.innerHTML = title + (sub ? `<small>${sub}</small>` : '');
+  return el;
+}
+
+function generate() {
+  const errEl = document.getElementById('error-msg');
+  errEl.style.display = 'none';
+  const filled = images.filter(Boolean).length;
+  if (filled < 28) {
+    errEl.textContent = `Need 28 images. You have ${filled}.`;
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const rawNames = document.getElementById('names-input').value;
+  const names = rawNames ? rawNames.split(',').map(s => s.trim()) : [];
+  while (names.length < 28) names.push('');
+
+  const s = i => ({ img: images[i], name: names[i] });
+
+  const topGrid = document.getElementById('top-grid');
+  const botGrid = document.getElementById('bot-grid');
+  topGrid.innerHTML = '';
+  botGrid.innerHTML = '';
+
+  // Set CSS vars for grid sizing
+  const spaceSize = '18mm';
+  const cornerSize = '28mm';
+  [topGrid, botGrid].forEach(g => {
+    g.style.setProperty('--space-size', spaceSize);
+    g.style.setProperty('--corner-size', cornerSize);
+  });
+
+  // ── TOP HALF ──
+  // Row 1: top corners + top row
+  topGrid.appendChild(makeSpace(s(14).img, s(14).name, true));
+  for (let i = 15; i <= 20; i++) topGrid.appendChild(makeSpace(s(i).img, s(i).name, false));
+  topGrid.appendChild(makeSpace(s(21).img, s(21).name, true));
+
+  // Rows 2–4: left side + filler + right side
+  const topSideLeft  = [13, 12, 11];
+  const topSideRight = [22, 23, 24];
+  topSideLeft.forEach((li, idx) => {
+    topGrid.appendChild(makeSpace(s(li).img, s(li).name, false));
+    if (idx === 0) {
+      const filler = makeFiller('REALM FORGE', 'Custom Board Game');
+      filler.style.gridColumn = '2 / 8';
+      filler.style.gridRow    = '2 / 5';
+      topGrid.appendChild(filler);
+    }
+    topGrid.appendChild(makeSpace(s(topSideRight[idx]).img, s(topSideRight[idx]).name, false));
+  });
+
+  // ── BOTTOM HALF ──
+  // Rows 1–3: left side + filler + right side
+  const botSideLeft  = [10, 9, 8];
+  const botSideRight = [25, 26, 27];
+  botSideLeft.forEach((li, idx) => {
+    botGrid.appendChild(makeSpace(s(li).img, s(li).name, false));
+    if (idx === 0) {
+      const filler = makeFiller('GOLDPATH', 'Print · Cut · Play');
+      filler.style.gridColumn = '2 / 8';
+      filler.style.gridRow    = '1 / 4';
+      botGrid.appendChild(filler);
+    }
+    botGrid.appendChild(makeSpace(s(botSideRight[idx]).img, s(botSideRight[idx]).name, false));
+  });
+
+  // Row 4: bottom corners + bottom row
+  botGrid.appendChild(makeSpace(s(7).img, s(7).name, true));
+  for (let i = 6; i >= 1; i--) botGrid.appendChild(makeSpace(s(i).img, s(i).name, false));
+  botGrid.appendChild(makeSpace(s(0).img, s(0).name, true));
+
+  document.getElementById('board-section').style.display = 'block';
+  document.getElementById('print-btn').style.display = 'inline-block';
+  document.getElementById('size-controls').style.display = 'block';
+  document.getElementById('board-section').scrollIntoView({ behavior:'smooth' });
+}
+
+function clearAll() {
+  images = []; loadedCount = 0;
+  document.getElementById('img-input').value = '';
+  document.getElementById('thumbs').innerHTML = '';
+  document.getElementById('img-count').textContent = '0';
+  document.getElementById('names-input').value = '';
+  document.getElementById('top-grid').innerHTML = '';
+  document.getElementById('bot-grid').innerHTML = '';
+  document.getElementById('board-section').style.display = 'none';
+  document.getElementById('print-btn').style.display = 'none';
+  document.getElementById('size-controls').style.display = 'none';
+  document.getElementById('error-msg').style.display = 'none';
+}
+</script>
+</body>
+</html>
