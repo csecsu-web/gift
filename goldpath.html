@@ -12,6 +12,8 @@
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family:Arial, sans-serif; background:#f0f2f5; padding:20px; }
+
+  /* ── SETUP PANEL ── */
   .panel { background:white; border-radius:10px; padding:24px; max-width:700px; margin:0 auto 20px; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
   .back { display:inline-block; margin-bottom:16px; color:#27ae60; font-weight:bold; text-decoration:none; font-size:14px; }
   .back:hover { text-decoration:underline; }
@@ -21,7 +23,7 @@
   input[type=file] { width:100%; padding:10px; border:2px dashed #aaa; border-radius:8px; margin-bottom:12px; cursor:pointer; }
   input[type=text] { width:100%; padding:10px; border:1px solid #ccc; border-radius:8px; font-size:14px; margin-bottom:16px; }
   .thumbs { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
-  .thumb { width:50px; height:50px; border-radius:5px; object-fit:cover; border:2px solid #ddd; }
+  .thumb { width:60px; height:60px; border-radius:6px; object-fit:cover; border:2px solid #ddd; }
   .count { font-size:13px; color:#666; margin-bottom:16px; }
   .count span { font-weight:bold; color:#27ae60; }
   .btns { display:flex; gap:10px; flex-wrap:wrap; }
@@ -33,126 +35,181 @@
   .how { background:#f0fff4; border-left:4px solid #27ae60; padding:14px 16px; border-radius:0 8px 8px 0; margin-bottom:20px; font-size:14px; color:#444; line-height:1.6; }
   .slot-order { background:#fffbea; border:1px solid #f0c040; border-radius:8px; padding:12px 16px; margin-bottom:16px; font-size:13px; color:#555; line-height:1.7; }
 
-  /* Size controls */
-  .size-controls {
-    background:#f8fff8;
-    border:1px solid #c3e6cb;
-    border-radius:8px;
-    padding:14px 16px;
-    margin-bottom:16px;
-    display:none;
-  }
-  .size-controls h3 { font-size:14px; color:#444; margin-bottom:12px; }
-  .slider-row { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
-  .slider-row label { font-size:13px; color:#555; font-weight:normal; min-width:140px; margin:0; }
-  input[type=range] { flex:1; cursor:pointer; }
-  .slider-val { font-size:13px; font-weight:bold; color:#27ae60; min-width:40px; text-align:right; }
-  .fit-toggle { display:flex; gap:8px; align-items:center; margin-top:4px; }
-  .fit-toggle label { font-size:13px; color:#555; font-weight:normal; margin:0; cursor:pointer; }
-  .fit-toggle input { cursor:pointer; }
+  /* Image controls */
+  .size-controls { background:#f0fff4; border:1px solid #c3e6cb; border-radius:8px; padding:16px; margin-bottom:16px; display:none; }
+  .size-controls h3 { font-size:14px; color:#444; margin-bottom:14px; }
+  .slider-row { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+  .slider-row .lbl { font-size:13px; color:#555; min-width:160px; }
+  input[type=range] { flex:1; cursor:pointer; accent-color:#27ae60; }
+  .slider-val { font-size:13px; font-weight:bold; color:#27ae60; min-width:44px; text-align:right; }
+  .fit-row { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+  .fit-row .lbl { font-size:13px; color:#555; min-width:160px; }
+  .fit-row label { font-size:13px; color:#444; cursor:pointer; display:flex; align-items:center; gap:5px; font-weight:normal; }
 
+  /* ── BOARD PREVIEW (screen only) ── */
   #board-section { display:none; }
 
-  /* ── BOARD ── */
-  .board-half { width:100%; max-width:800px; background:white; margin:0 auto 20px; overflow:hidden; border:1px solid #ccc; }
-  .half-label { text-align:center; font-weight:bold; font-size:15px; color:#555; padding:10px; background:#f0f2f5; border-bottom:2px solid #ddd; }
+  .board-preview-wrap {
+    max-width:960px;
+    margin:0 auto 24px;
+    background:white;
+    border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+    overflow:hidden;
+  }
+  .half-label {
+    text-align:center; font-weight:bold; font-size:14px; color:#555;
+    padding:8px; background:#f0f2f5; border-bottom:2px solid #ddd;
+  }
 
-  .half-grid { display:grid; padding:6mm; gap:0; }
+  /*
+   * BOARD GRID
+   * On screen: uses px so you can see it.
+   * On print: overridden to mm for exact A4 fit.
+   *
+   * Layout: 8 columns × 4 rows (top half) or 4 rows × 8 columns (bottom half)
+   * Columns: corner(big) + 6 normal + corner(big)
+   */
+
+  .half-grid {
+    display:grid;
+    background:#e8f5d4;
+  }
+
+  /* TOP half: corner row on top */
   .top-grid {
-    grid-template-columns: var(--corner-size) repeat(6, var(--space-size)) var(--corner-size);
-    grid-template-rows: var(--corner-size) repeat(3, var(--space-size));
+    grid-template-columns: var(--c) repeat(6, var(--s)) var(--c);
+    grid-template-rows:    var(--c) repeat(3, var(--s));
   }
+  /* BOTTOM half: corner row on bottom */
   .bot-grid {
-    grid-template-columns: var(--corner-size) repeat(6, var(--space-size)) var(--space-size);
-    grid-template-rows: repeat(3, var(--space-size)) var(--corner-size);
+    grid-template-columns: var(--c) repeat(6, var(--s)) var(--c);
+    grid-template-rows:    repeat(3, var(--s)) var(--c);
   }
 
-  .space {
-    border:1px solid #888;
+  /* Screen sizes */
+  .half-grid { --c:88px; --s:60px; }
+
+  /* Cell base */
+  .space, .corner, .side-filler {
+    border:1.5px solid #555;
+    overflow:hidden;
     display:flex;
     flex-direction:column;
     align-items:center;
     justify-content:flex-start;
-    overflow:hidden;
-    background:white;
+    background:#fff;
   }
 
-  /* Image wrapper keeps fixed square ratio */
-  .space .img-wrap {
+  /* Image wrapper — takes up most of the cell */
+  .img-wrap {
     width:100%;
-    /* height set proportionally via JS or CSS var */
     flex-shrink:0;
     overflow:hidden;
     display:flex;
     align-items:center;
     justify-content:center;
-    background:#f0f0f0;
+    background:#eee;
   }
-  .space .img-wrap img {
+  .img-wrap img {
     width:100%;
     height:100%;
     display:block;
+    object-fit:cover; /* default; toggled by JS */
   }
-  .space .img-wrap img.fit-contain { object-fit:contain; }
-  .space .img-wrap img.fit-cover   { object-fit:cover; }
 
-  .space-name { font-size:5.5px; text-align:center; color:#222; padding:1px 2px; line-height:1.3; word-break:break-word; width:100%; }
+  .space-name {
+    font-size:5.5px;
+    text-align:center;
+    color:#111;
+    padding:1px 2px;
+    line-height:1.3;
+    word-break:break-word;
+    width:100%;
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
 
   .corner {
-    border:1px solid #555;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    overflow:hidden;
     background:#c8f7c5;
+    justify-content:center;
+    align-items:center;
+    gap:2px;
   }
   .corner .img-wrap {
-    width:75%;
+    width:68%;
     aspect-ratio:1;
-    overflow:hidden;
-    display:flex;
-    align-items:center;
-    justify-content:center;
+    border-radius:50%;
+    flex-shrink:0;
   }
-  .corner .img-wrap img {
-    width:100%;
-    height:100%;
-    display:block;
+  .corner-name {
+    font-size:7px;
+    font-weight:bold;
+    color:#1a5e1a;
+    text-align:center;
+    padding:0 3px;
   }
-  .corner .img-wrap img.fit-contain { object-fit:contain; }
-  .corner .img-wrap img.fit-cover   { object-fit:cover; }
-
-  .corner-name { font-size:7px; font-weight:bold; text-align:center; color:#1a5e1a; margin-top:3px; padding:0 2px; }
 
   .side-filler {
-    background:#e8f5e9; border:1px solid #aaa;
-    display:flex; align-items:center; justify-content:center;
-    font-size:16px; font-weight:bold; color:#1a5e1a; text-align:center;
-    flex-direction:column; gap:4px;
+    background:#e8f5e9;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    gap:4px;
+    border:1.5px solid #aaa;
   }
-  .side-filler small { font-size:10px; font-weight:normal; color:#4a8f4a; }
+  .side-filler .filler-title { font-size:18px; font-weight:bold; color:#1a5e1a; text-align:center; }
+  .side-filler .filler-sub   { font-size:9px;  font-weight:normal; color:#4a8f4a; text-align:center; }
 
+  /* ── PRINT ── */
   @media print {
     body { background:white; margin:0; padding:0; }
-    .panel { display:none !important; }
-    .size-controls { display:none !important; }
+    .panel, .size-controls { display:none !important; }
     #board-section { display:block !important; }
-    .half-label { display:none; }
-    .board-half { width:210mm; max-width:none; margin:0; page-break-after:always; border:none; }
-    .board-half:last-child { page-break-after:avoid; }
-    .half-grid { padding:4mm; }
+    .half-label { display:none !important; }
+
+    /* Each board half = exactly one A4 page */
+    .board-preview-wrap {
+      max-width:none;
+      width:210mm;
+      margin:0;
+      box-shadow:none;
+      border-radius:0;
+      page-break-after:always;
+    }
+    .board-preview-wrap:last-child { page-break-after:avoid; }
+
+    /*
+     * A4 = 210mm wide.  Board has 8 columns: 2 corners + 6 normal.
+     * We want it to fill the page with 4mm margins each side → usable = 202mm
+     * Corner = 34mm, Normal = (202 - 2×34) / 6 = 134/6 ≈ 22.3mm → use 22mm, corners 34mm
+     * 2×34 + 6×22 = 68+132 = 200mm ✓ (fits in 202mm usable)
+     *
+     * Height (4 rows): top grid → 1 corner row + 3 normal rows
+     * A4 height = 297mm, minus 4mm top/bottom = 289mm usable
+     * Corner row = 34mm, Normal rows = (289 - 34) / 3 = 85mm each → use 34mm+3×85=289mm ✓
+     */
+    .half-grid {
+      --c: 34mm;
+      --s: 22mm;
+      padding:4mm;
+      width:210mm;
+      box-sizing:border-box;
+      height:297mm;
+    }
     .top-grid {
-      grid-template-columns: 25mm repeat(6,16mm) 25mm !important;
-      grid-template-rows: 25mm repeat(3,16mm) !important;
+      grid-template-rows: var(--c) repeat(3, 1fr);
     }
     .bot-grid {
-      grid-template-columns: 25mm repeat(6,16mm) 25mm !important;
-      grid-template-rows: repeat(3,16mm) 25mm !important;
+      grid-template-rows: repeat(3, 1fr) var(--c);
     }
-    .space-name { font-size:5px; }
-    .corner-name { font-size:6px; }
-    .side-filler { font-size:12px; }
+
+    .space-name  { font-size:5px; }
+    .corner-name { font-size:7px; }
+    .side-filler .filler-title { font-size:20px; }
+    .side-filler .filler-sub   { font-size:8px; }
   }
 </style>
 </head>
@@ -164,56 +221,53 @@
   <p class="subtitle">The custom property board game</p>
 
   <div class="how">
-    <strong>How it works:</strong> Upload 28 images and optionally name each space. Goldpath generates your board across 2 A4 pages — print both, tape them together, and play!
+    <strong>How it works:</strong> Upload 28 images and optionally name each space. Goldpath generates your board across 2 A4 pages — print both, tape them together at the middle seam, and play!
   </div>
 
   <label>Upload 28 images:</label>
   <div class="slot-order">
-    <strong>Image upload order (clockwise from bottom-right):</strong><br>
-    1 = Bottom-right corner · 2–7 = Bottom row (right → left) · 8 = Bottom-left corner<br>
-    9–14 = Left side (bottom → top) · 15 = Top-left corner<br>
-    16–21 = Top row (left → right) · 22 = Top-right corner · 23–28 = Right side (top → bottom)
+    <strong>Image order (clockwise from bottom-right corner):</strong><br>
+    1 = Bottom-right corner · 2–7 = Bottom row (right→left) · 8 = Bottom-left corner<br>
+    9–14 = Left side (bottom→top) · 15 = Top-left corner<br>
+    16–21 = Top row (left→right) · 22 = Top-right corner · 23–28 = Right side (top→bottom)
   </div>
   <input type="file" id="img-input" multiple accept="image/*">
   <div class="thumbs" id="thumbs"></div>
   <div class="count">Images loaded: <span id="img-count">0</span> / 28</div>
 
   <label>Space names — 28 comma-separated (optional):</label>
-  <input type="text" id="names-input" placeholder="Golden Gate, Silver Road, Dragon Keep, ...">
+  <input type="text" id="names-input" placeholder="Dragon Keep, Silver Road, Goblin Bridge, ...">
 
-  <!-- Size controls shown after generation -->
   <div class="size-controls" id="size-controls">
     <h3>🖼️ Image Display Settings</h3>
     <div class="slider-row">
-      <label>Image height in space:</label>
-      <input type="range" id="img-height" min="20" max="90" value="60" oninput="applyImgHeight(this.value)">
-      <span class="slider-val" id="img-height-val">60%</span>
+      <span class="lbl">Image size in space:</span>
+      <input type="range" id="img-h" min="30" max="95" value="70" oninput="applyImgHeight(this.value)">
+      <span class="slider-val" id="img-h-val">70%</span>
     </div>
-    <div class="fit-toggle">
-      <span style="font-size:13px;color:#555;min-width:140px;">Image fit:</span>
-      <input type="radio" name="fit" id="fit-cover" value="cover" checked onchange="applyFit('cover')">
-      <label for="fit-cover">Crop to fill (no gaps)</label>
-      &nbsp;&nbsp;
-      <input type="radio" name="fit" id="fit-contain" value="contain" onchange="applyFit('contain')">
-      <label for="fit-contain">Show full image</label>
+    <div class="fit-row">
+      <span class="lbl">Image fit:</span>
+      <label><input type="radio" name="fit" value="cover" checked onchange="applyFit('cover')"> Crop to fill</label>
+      <label><input type="radio" name="fit" value="contain" onchange="applyFit('contain')"> Show full photo</label>
     </div>
   </div>
 
   <div class="btns">
     <button class="btn-gen" onclick="generate()">Generate Board</button>
-    <button class="btn-print" id="print-btn" onclick="window.print()">Print / Save as PDF</button>
+    <button class="btn-print" id="print-btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
     <button class="btn-clear" onclick="clearAll()">Clear</button>
   </div>
   <div class="error" id="error-msg"></div>
 </div>
 
+<!-- Board output — two halves, each becomes one A4 page when printed -->
 <div id="board-section">
-  <div class="board-half">
-    <div class="half-label">Page 1 — Top half (print this first)</div>
+  <div class="board-preview-wrap" id="half-top">
+    <div class="half-label">📄 Page 1 — Top half of board</div>
     <div class="half-grid top-grid" id="top-grid"></div>
   </div>
-  <div class="board-half">
-    <div class="half-label">Page 2 — Bottom half (tape to page 1)</div>
+  <div class="board-preview-wrap" id="half-bot">
+    <div class="half-label">📄 Page 2 — Bottom half (tape to page 1 along the middle seam)</div>
     <div class="half-grid bot-grid" id="bot-grid"></div>
   </div>
 </div>
@@ -222,40 +276,24 @@
 let images = [];
 let loadedCount = 0;
 let currentFit = 'cover';
-let currentImgHeight = 60;
+let currentImgH = 70;
 
-function resizeImage(src, size, callback) {
-  const img = new Image();
-  img.onload = () => {
-    const c = document.createElement('canvas');
-    c.width = size; c.height = size;
-    const ctx = c.getContext('2d');
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, size, size);
-    const ratio = Math.min(size / img.width, size / img.height);
-    const w = img.width * ratio;
-    const h = img.height * ratio;
-    ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
-    callback(c.toDataURL('image/jpeg', 0.8));
-  };
-  img.src = src;
-}
-
+// Full quality — no canvas shrink
 document.getElementById('img-input').addEventListener('change', function(e) {
-  images = []; loadedCount = 0;
+  images = [];
+  loadedCount = 0;
   document.getElementById('thumbs').innerHTML = '';
   document.getElementById('img-count').textContent = '0';
   Array.from(e.target.files).forEach((file, i) => {
     const reader = new FileReader();
     reader.onload = ev => {
-      resizeImage(ev.target.result, 200, small => {
-        images[i] = small;
-        loadedCount++;
-        document.getElementById('img-count').textContent = loadedCount;
-        const img = document.createElement('img');
-        img.className = 'thumb'; img.src = small;
-        document.getElementById('thumbs').appendChild(img);
-      });
+      images[i] = ev.target.result;
+      loadedCount++;
+      document.getElementById('img-count').textContent = loadedCount;
+      const img = document.createElement('img');
+      img.className = 'thumb';
+      img.src = ev.target.result;
+      document.getElementById('thumbs').appendChild(img);
     };
     reader.readAsDataURL(file);
   });
@@ -264,51 +302,82 @@ document.getElementById('img-input').addEventListener('change', function(e) {
 function applyFit(mode) {
   currentFit = mode;
   document.querySelectorAll('.img-wrap img').forEach(img => {
-    img.className = 'fit-' + mode;
+    img.style.objectFit = mode;
   });
 }
 
 function applyImgHeight(val) {
-  currentImgHeight = parseInt(val);
-  document.getElementById('img-height-val').textContent = val + '%';
+  currentImgH = parseInt(val);
+  document.getElementById('img-h-val').textContent = val + '%';
   document.querySelectorAll('.space .img-wrap').forEach(wrap => {
     wrap.style.height = val + '%';
   });
 }
 
-function makeSpace(imgSrc, name, isCorner) {
+/* Build a normal board space */
+function makeSpace(imgSrc, name) {
   const el = document.createElement('div');
-  el.className = isCorner ? 'corner' : 'space';
+  el.className = 'space';
 
   const wrap = document.createElement('div');
   wrap.className = 'img-wrap';
-
-  if (!isCorner) {
-    // For regular spaces, height is a percentage of the cell
-    wrap.style.height = currentImgHeight + '%';
-  }
+  wrap.style.height = currentImgH + '%';
 
   if (imgSrc) {
     const img = document.createElement('img');
     img.src = imgSrc;
     img.alt = '';
-    img.className = 'fit-' + currentFit;
+    img.style.objectFit = currentFit;
     wrap.appendChild(img);
   }
   el.appendChild(wrap);
 
-  const label = document.createElement('div');
-  label.className = isCorner ? 'corner-name' : 'space-name';
-  label.textContent = name || '';
-  el.appendChild(label);
-
+  const lbl = document.createElement('div');
+  lbl.className = 'space-name';
+  lbl.textContent = name || '';
+  el.appendChild(lbl);
   return el;
 }
 
-function makeFiller(title, sub) {
+/* Build a corner space */
+function makeCorner(imgSrc, name) {
+  const el = document.createElement('div');
+  el.className = 'corner';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'img-wrap';
+  if (imgSrc) {
+    const img = document.createElement('img');
+    img.src = imgSrc;
+    img.alt = '';
+    img.style.objectFit = currentFit;
+    wrap.appendChild(img);
+  }
+  el.appendChild(wrap);
+
+  const lbl = document.createElement('div');
+  lbl.className = 'corner-name';
+  lbl.textContent = name || '';
+  el.appendChild(lbl);
+  return el;
+}
+
+/* Build the center filler block */
+function makeFiller(title, sub, colSpan, rowSpan) {
   const el = document.createElement('div');
   el.className = 'side-filler';
-  el.innerHTML = title + (sub ? `<small>${sub}</small>` : '');
+  el.style.gridColumn = `span ${colSpan}`;
+  el.style.gridRow    = `span ${rowSpan}`;
+
+  const t = document.createElement('div');
+  t.className = 'filler-title';
+  t.textContent = title;
+  el.appendChild(t);
+
+  const s = document.createElement('div');
+  s.className = 'filler-sub';
+  s.textContent = sub;
+  el.appendChild(s);
   return el;
 }
 
@@ -326,60 +395,63 @@ function generate() {
   const names = rawNames ? rawNames.split(',').map(s => s.trim()) : [];
   while (names.length < 28) names.push('');
 
-  const s = i => ({ img: images[i], name: names[i] });
+  // Helper shorthand
+  const sp = i => makeSpace(images[i],  names[i]);
+  const co = i => makeCorner(images[i], names[i]);
 
   const topGrid = document.getElementById('top-grid');
   const botGrid = document.getElementById('bot-grid');
   topGrid.innerHTML = '';
   botGrid.innerHTML = '';
 
-  // Set CSS vars for grid sizing
-  const spaceSize = '18mm';
-  const cornerSize = '28mm';
-  [topGrid, botGrid].forEach(g => {
-    g.style.setProperty('--space-size', spaceSize);
-    g.style.setProperty('--corner-size', cornerSize);
-  });
+  /*
+   * Board index map (0-based, clockwise from bottom-right):
+   *
+   *  14 — 15 16 17 18 19 20 — 21      ← TOP HALF row 0 (corners + top row)
+   *  13 |                    | 22      ← TOP HALF rows 1-3 sides
+   *  12 |   [center filler]  | 23
+   *  11 |                    | 24
+   * ─────────────────────────────────  ← tape seam
+   *  10 |                    | 25      ← BOT HALF rows 0-2 sides
+   *   9 |   [center filler]  | 26
+   *   8 |                    | 27
+   *   7 — 6  5  4  3  2  1  — 0       ← BOT HALF row 3 (corners + bottom row)
+   */
 
-  // ── TOP HALF ──
-  // Row 1: top corners + top row
-  topGrid.appendChild(makeSpace(s(14).img, s(14).name, true));
-  for (let i = 15; i <= 20; i++) topGrid.appendChild(makeSpace(s(i).img, s(i).name, false));
-  topGrid.appendChild(makeSpace(s(21).img, s(21).name, true));
+  // ── TOP HALF ─────────────────────────────────────────────
+  // Row 0: top-left corner, 6 top spaces (left→right), top-right corner
+  topGrid.appendChild(co(14));
+  for (let i = 15; i <= 20; i++) topGrid.appendChild(sp(i));
+  topGrid.appendChild(co(21));
 
-  // Rows 2–4: left side + filler + right side
-  const topSideLeft  = [13, 12, 11];
-  const topSideRight = [22, 23, 24];
-  topSideLeft.forEach((li, idx) => {
-    topGrid.appendChild(makeSpace(s(li).img, s(li).name, false));
+  // Rows 1-3: left side cell, then filler (spans cols 2-7, rows 2-4), then right side cell
+  const topLeft  = [13, 12, 11];
+  const topRight = [22, 23, 24];
+  topLeft.forEach((li, idx) => {
+    topGrid.appendChild(sp(li));
     if (idx === 0) {
-      const filler = makeFiller('REALM FORGE', 'Custom Board Game');
-      filler.style.gridColumn = '2 / 8';
-      filler.style.gridRow    = '2 / 5';
-      topGrid.appendChild(filler);
+      // Filler spans 6 cols × 3 rows
+      topGrid.appendChild(makeFiller('REALM FORGE', 'Custom Board Game', 6, 3));
     }
-    topGrid.appendChild(makeSpace(s(topSideRight[idx]).img, s(topSideRight[idx]).name, false));
+    topGrid.appendChild(sp(topRight[idx]));
   });
 
-  // ── BOTTOM HALF ──
-  // Rows 1–3: left side + filler + right side
-  const botSideLeft  = [10, 9, 8];
-  const botSideRight = [25, 26, 27];
-  botSideLeft.forEach((li, idx) => {
-    botGrid.appendChild(makeSpace(s(li).img, s(li).name, false));
+  // ── BOTTOM HALF ───────────────────────────────────────────
+  // Rows 0-2: left side, filler, right side
+  const botLeft  = [10, 9, 8];
+  const botRight = [25, 26, 27];
+  botLeft.forEach((li, idx) => {
+    botGrid.appendChild(sp(li));
     if (idx === 0) {
-      const filler = makeFiller('GOLDPATH', 'Print · Cut · Play');
-      filler.style.gridColumn = '2 / 8';
-      filler.style.gridRow    = '1 / 4';
-      botGrid.appendChild(filler);
+      botGrid.appendChild(makeFiller('GOLDPATH', 'Print · Tape · Play', 6, 3));
     }
-    botGrid.appendChild(makeSpace(s(botSideRight[idx]).img, s(botSideRight[idx]).name, false));
+    botGrid.appendChild(sp(botRight[idx]));
   });
 
-  // Row 4: bottom corners + bottom row
-  botGrid.appendChild(makeSpace(s(7).img, s(7).name, true));
-  for (let i = 6; i >= 1; i--) botGrid.appendChild(makeSpace(s(i).img, s(i).name, false));
-  botGrid.appendChild(makeSpace(s(0).img, s(0).name, true));
+  // Row 3: bottom-left corner, 6 bottom spaces (right→left), bottom-right corner
+  botGrid.appendChild(co(7));
+  for (let i = 6; i >= 1; i--) botGrid.appendChild(sp(i));
+  botGrid.appendChild(co(0));
 
   document.getElementById('board-section').style.display = 'block';
   document.getElementById('print-btn').style.display = 'inline-block';
