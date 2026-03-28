@@ -20,13 +20,13 @@
   label { font-weight:bold; display:block; margin-bottom:6px; color:#444; }
   input[type=file] { width:100%; padding:10px; border:2px dashed #aaa; border-radius:8px; margin-bottom:12px; cursor:pointer; }
   .thumbs { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
-  .thumb { width:50px; height:50px; border-radius:5px; object-fit:cover; border:2px solid #ddd; }
+  .thumb { width:60px; height:60px; border-radius:6px; object-fit:cover; border:2px solid #ddd; }
   .count { font-size:14px; color:#666; margin-bottom:16px; }
   .count span { font-weight:bold; color:#5a3ecb; }
   .row { display:flex; align-items:center; gap:16px; margin-bottom:16px; flex-wrap:wrap; }
   .row label { margin:0; white-space:nowrap; }
   select { padding:8px 12px; border:1px solid #ccc; border-radius:8px; font-size:14px; }
-  .btns { display:flex; gap:10px; flex-wrap:wrap; }
+  .btns { display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; }
   button { padding:12px 24px; border:none; border-radius:8px; font-size:15px; font-weight:bold; cursor:pointer; }
   .btn-gen { background:#5a3ecb; color:white; }
   .btn-print { background:#27ae60; color:white; display:none; }
@@ -34,100 +34,78 @@
   .error { background:#ffe0e0; color:#c0392b; padding:12px; border-radius:8px; margin-top:12px; display:none; }
   .how { background:#f5f3ff; border-left:4px solid #5a3ecb; padding:14px 16px; border-radius:0 8px 8px 0; margin-bottom:20px; font-size:14px; color:#444; line-height:1.6; }
 
-  /* Size controls */
-  .size-controls {
-    background:#f8f8ff;
-    border:1px solid #ddd;
-    border-radius:8px;
-    padding:14px 16px;
-    margin-bottom:16px;
-    display:none;
-  }
-  .size-controls h3 { font-size:14px; color:#444; margin-bottom:12px; }
-  .slider-row { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
-  .slider-row label { font-size:13px; color:#555; font-weight:normal; min-width:130px; margin:0; }
-  input[type=range] { flex:1; cursor:pointer; }
-  .slider-val { font-size:13px; font-weight:bold; color:#5a3ecb; min-width:40px; text-align:right; }
-  .fit-toggle { display:flex; gap:8px; align-items:center; margin-top:4px; }
-  .fit-toggle label { font-size:13px; color:#555; font-weight:normal; margin:0; cursor:pointer; }
-  .fit-toggle input { cursor:pointer; }
+  .size-controls { background:#f8f8ff; border:1px solid #dde; border-radius:8px; padding:16px; margin-bottom:16px; display:none; }
+  .size-controls h3 { font-size:14px; color:#444; margin-bottom:14px; }
+  .slider-row { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+  .slider-row .lbl { font-size:13px; color:#555; min-width:140px; }
+  input[type=range] { flex:1; cursor:pointer; accent-color:#5a3ecb; }
+  .slider-val { font-size:13px; font-weight:bold; color:#5a3ecb; min-width:44px; text-align:right; }
+  .fit-row { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+  .fit-row .lbl { font-size:13px; color:#555; min-width:140px; }
+  .fit-row label { font-size:13px; color:#444; cursor:pointer; display:flex; align-items:center; gap:5px; font-weight:normal; }
 
-  #cards-section { display:none; }
+  #cards-section { display:none; background:white; }
 
   .cards-grid {
-    display:grid;
-    grid-template-columns: repeat(var(--cols), var(--card-size));
-    gap:16px;
+    display:flex;
+    flex-wrap:wrap;
     justify-content:center;
-    padding:10px;
+    gap:14px;
+    padding:20px;
   }
 
   .card {
-    width:var(--card-size);
-    height:var(--card-size);
     border:3px solid #2c2c54;
     border-radius:50%;
-    padding:12px;
     background:white;
     position:relative;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-  }
-
-  /* The inner layout of each card — 6 symbols in 2 rows of 3 */
-  .card-inner {
-    width:100%;
-    height:100%;
-    border-radius:50%;
+    flex-shrink:0;
     overflow:hidden;
     display:grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(2, 1fr);
-    gap:3px;
+    grid-template-columns:repeat(3,1fr);
+    grid-template-rows:repeat(2,1fr);
+    gap:2px;
+    padding:12px;
   }
 
   .symbol {
+    overflow:hidden;
+    border-radius:3px;
     display:flex;
     align-items:center;
     justify-content:center;
-    overflow:hidden;
-    border-radius:4px;
-    background:#f9f9f9;
+    background:#f5f5f5;
+    min-width:0;
+    min-height:0;
   }
-
-  /* object-fit controlled by JS toggle */
   .symbol img {
     width:100%;
     height:100%;
     display:block;
+    /* object-fit set by JS */
   }
 
-  .symbol img.fit-contain { object-fit:contain; background:#f0f0f0; }
-  .symbol img.fit-cover   { object-fit:cover; }
-
   .card-num {
-    position:absolute; top:-12px; left:50%; transform:translateX(-50%);
-    background:#5a3ecb; color:white; padding:2px 8px;
-    border-radius:10px; font-size:11px; font-weight:bold; white-space:nowrap;
+    position:absolute; top:6px; left:50%; transform:translateX(-50%);
+    background:#5a3ecb; color:white; padding:1px 7px;
+    border-radius:10px; font-size:10px; font-weight:bold; white-space:nowrap; z-index:2;
   }
 
   @media print {
     body { background:white; margin:0; padding:0; }
-    .panel { display:none !important; }
+    .panel, .size-controls { display:none !important; }
     #cards-section { display:block !important; }
-    .size-controls { display:none !important; }
     .cards-grid {
       display:grid !important;
-      grid-template-columns: repeat(var(--print-cols), 1fr) !important;
-      gap:8mm !important;
-      padding:8mm !important;
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap:6mm !important;
+      padding:6mm !important;
       width:210mm;
       box-sizing:border-box;
     }
-    .card { width:auto !important; height:auto !important; aspect-ratio:1; border-radius:50%; padding:10px; }
+    .card { width:auto !important; height:auto !important; aspect-ratio:1/1; border-radius:50%; padding:10px; }
     .card-num { display:none; }
-    .page-break { page-break-after:always; display:block; }
+    .page-break { page-break-after:always; grid-column:1/-1; height:0; }
   }
 </style>
 </head>
@@ -149,39 +127,35 @@
 
   <div class="row">
     <label>Cards per page:</label>
-    <select id="per-page" onchange="updateLayout()">
-      <option value="4">4 per page (2×2 — large, easy to cut)</option>
-      <option value="6" selected>6 per page (2×3 — recommended)</option>
-      <option value="9">9 per page (3×3 — compact)</option>
+    <select id="per-page" onchange="updatePerPage()">
+      <option value="4">4 per page (large, easy to cut)</option>
+      <option value="6" selected>6 per page (recommended)</option>
+      <option value="9">9 per page (compact)</option>
     </select>
   </div>
 
-  <!-- Size & display controls (shown after generation) -->
   <div class="size-controls" id="size-controls">
     <h3>🖼️ Image Display Settings</h3>
     <div class="slider-row">
-      <label>Symbol size:</label>
-      <input type="range" id="sym-size" min="60" max="160" value="100" oninput="applySymbolSize(this.value)">
-      <span class="slider-val" id="sym-size-val">100%</span>
+      <span class="lbl">Card size:</span>
+      <input type="range" id="card-sz" min="120" max="310" value="200" oninput="applyCardSize(this.value)">
+      <span class="slider-val" id="card-sz-val">200px</span>
     </div>
     <div class="slider-row">
-      <label>Card size:</label>
-      <input type="range" id="card-size-slider" min="140" max="320" value="230" oninput="applyCardSize(this.value)">
-      <span class="slider-val" id="card-size-val">230px</span>
+      <span class="lbl">Symbol zoom:</span>
+      <input type="range" id="sym-zoom" min="60" max="140" value="100" oninput="applyZoom(this.value)">
+      <span class="slider-val" id="sym-zoom-val">100%</span>
     </div>
-    <div class="fit-toggle">
-      <span style="font-size:13px;color:#555;min-width:130px;">Image fit:</span>
-      <input type="radio" name="fit" id="fit-cover" value="cover" checked onchange="applyFit('cover')">
-      <label for="fit-cover">Crop to fill (no white space)</label>
-      &nbsp;&nbsp;
-      <input type="radio" name="fit" id="fit-contain" value="contain" onchange="applyFit('contain')">
-      <label for="fit-contain">Show full image</label>
+    <div class="fit-row">
+      <span class="lbl">Image fit:</span>
+      <label><input type="radio" name="fit" value="cover" checked onchange="applyFit('cover')"> Crop to fill</label>
+      <label><input type="radio" name="fit" value="contain" onchange="applyFit('contain')"> Show full photo</label>
     </div>
   </div>
 
   <div class="btns">
     <button class="btn-gen" onclick="generate()">Generate Cards</button>
-    <button class="btn-print" id="print-btn" onclick="window.print()">Print / Save as PDF</button>
+    <button class="btn-print" id="print-btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
     <button class="btn-clear" onclick="clearAll()">Clear</button>
   </div>
   <div class="error" id="error-msg"></div>
@@ -195,129 +169,44 @@
 let images = [];
 let loadedCount = 0;
 let generated = false;
+let cardSize = 200;
 let currentFit = 'cover';
-let currentSymSize = 100;
-let currentCardSize = 230;
 
-const CONFIG = {
-  4: { cols:2, printCols:2, cardSize:280 },
-  6: { cols:2, printCols:2, cardSize:230 },
-  9: { cols:3, printCols:3, cardSize:170 },
-};
-
-function updateLayout() {
-  if (!generated) return;
-  applyConfig();
-}
-
-function applyConfig() {
-  const perPage = parseInt(document.getElementById('per-page').value);
-  const cfg = CONFIG[perPage];
-  currentCardSize = cfg.cardSize;
-  document.getElementById('card-size-slider').value = cfg.cardSize;
-  document.getElementById('card-size-val').textContent = cfg.cardSize + 'px';
-  applyCardSize(cfg.cardSize);
-  const grid = document.getElementById('cards-grid');
-  grid.style.setProperty('--cols', cfg.cols);
-  grid.style.setProperty('--print-cols', cfg.printCols);
-  insertPageBreaks();
-}
-
-function insertPageBreaks() {
-  const perPage = parseInt(document.getElementById('per-page').value);
-  const grid = document.getElementById('cards-grid');
-  grid.querySelectorAll('.page-break').forEach(el => el.remove());
-  const allCards = grid.querySelectorAll('.card');
-  allCards.forEach((card, i) => {
-    if ((i + 1) % perPage === 0 && i !== allCards.length - 1) {
-      const br = document.createElement('div');
-      br.className = 'page-break';
-      br.style.gridColumn = '1 / -1';
-      card.after(br);
-    }
-  });
-}
-
-function applyCardSize(val) {
-  currentCardSize = parseInt(val);
-  document.getElementById('card-size-val').textContent = val + 'px';
-  document.getElementById('cards-grid').style.setProperty('--card-size', val + 'px');
-  // Update inner symbol sizes when card size changes
-  applySymbolSize(currentSymSize);
-}
-
-function applySymbolSize(val) {
-  currentSymSize = parseInt(val);
-  document.getElementById('sym-size-val').textContent = val + '%';
-  // Each symbol cell gets sized proportionally
-  document.querySelectorAll('.symbol img').forEach(img => {
-    img.style.width = val + '%';
-    img.style.height = val + '%';
-  });
-}
-
-function applyFit(mode) {
-  currentFit = mode;
-  document.querySelectorAll('.symbol img').forEach(img => {
-    img.className = 'fit-' + mode;
-  });
-}
-
-function resizeImage(src, size, callback) {
-  const img = new Image();
-  img.onload = () => {
-    const c = document.createElement('canvas');
-    c.width = size; c.height = size;
-    const ctx = c.getContext('2d');
-    // Draw with white background to avoid transparency issues
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, size, size);
-    // Center the image, preserving aspect ratio
-    const ratio = Math.min(size / img.width, size / img.height);
-    const w = img.width * ratio;
-    const h = img.height * ratio;
-    const x = (size - w) / 2;
-    const y = (size - h) / 2;
-    ctx.drawImage(img, x, y, w, h);
-    callback(c.toDataURL('image/jpeg', 0.75));
-  };
-  img.src = src;
-}
-
+// Read full-res images — NO canvas shrinking = sharp photos
 document.getElementById('img-input').addEventListener('change', function(e) {
-  images = []; loadedCount = 0;
+  images = [];
+  loadedCount = 0;
   document.getElementById('thumbs').innerHTML = '';
   document.getElementById('img-count').textContent = '0';
   Array.from(e.target.files).forEach((file, i) => {
     const reader = new FileReader();
     reader.onload = ev => {
-      resizeImage(ev.target.result, 200, small => {
-        images[i] = small;
-        loadedCount++;
-        document.getElementById('img-count').textContent = loadedCount;
-        const img = document.createElement('img');
-        img.className = 'thumb'; img.src = small;
-        document.getElementById('thumbs').appendChild(img);
-      });
+      images[i] = ev.target.result; // full resolution, untouched
+      loadedCount++;
+      document.getElementById('img-count').textContent = loadedCount;
+      const img = document.createElement('img');
+      img.className = 'thumb';
+      img.src = ev.target.result;
+      document.getElementById('thumbs').appendChild(img);
     };
     reader.readAsDataURL(file);
   });
 });
 
-function generateCards() {
+function generateCardSets() {
   const n = 5, cards = [];
   const first = [];
   for (let i = 0; i <= n; i++) first.push(i);
   cards.push(first);
   for (let r = 0; r < n; r++) {
     const card = [0];
-    for (let c = 0; c < n; c++) card.push(n + 1 + r * n + c);
+    for (let c2 = 0; c2 < n; c2++) card.push(n + 1 + r * n + c2);
     cards.push(card);
   }
   for (let r = 0; r < n; r++) {
-    for (let c = 0; c < n; c++) {
+    for (let c2 = 0; c2 < n; c2++) {
       const card = [r + 1];
-      for (let k = 0; k < n; k++) card.push(n + 1 + k * n + ((c + r * k) % n));
+      for (let k = 0; k < n; k++) card.push(n + 1 + k * n + ((c2 + r * k) % n));
       cards.push(card);
     }
   }
@@ -333,49 +222,86 @@ function generate() {
     errEl.style.display = 'block';
     return;
   }
-
-  const cards = generateCards();
+  const cards = generateCardSets();
   const grid = document.getElementById('cards-grid');
   grid.innerHTML = '';
-  const fragment = document.createDocumentFragment();
 
-  cards.forEach((card, idx) => {
+  cards.forEach((symbolList, idx) => {
     const cardEl = document.createElement('div');
     cardEl.className = 'card';
+    cardEl.style.width  = cardSize + 'px';
+    cardEl.style.height = cardSize + 'px';
 
     const numEl = document.createElement('div');
     numEl.className = 'card-num';
     numEl.textContent = '#' + (idx + 1);
     cardEl.appendChild(numEl);
 
-    const innerEl = document.createElement('div');
-    innerEl.className = 'card-inner';
-
-    card.forEach(symIdx => {
+    symbolList.forEach(symIdx => {
       const sym = document.createElement('div');
       sym.className = 'symbol';
       const imgEl = document.createElement('img');
       imgEl.src = images[symIdx];
-      imgEl.className = 'fit-' + currentFit;
-      imgEl.style.width = currentSymSize + '%';
-      imgEl.style.height = currentSymSize + '%';
+      imgEl.style.objectFit = currentFit;
       imgEl.alt = '';
       sym.appendChild(imgEl);
-      innerEl.appendChild(sym);
+      cardEl.appendChild(sym);
     });
 
-    cardEl.appendChild(innerEl);
-    fragment.appendChild(cardEl);
+    grid.appendChild(cardEl);
   });
 
-  grid.appendChild(fragment);
   generated = true;
-  applyConfig();
-
+  insertPageBreaks();
   document.getElementById('cards-section').style.display = 'block';
   document.getElementById('print-btn').style.display = 'inline-block';
   document.getElementById('size-controls').style.display = 'block';
   document.getElementById('cards-section').scrollIntoView({ behavior:'smooth' });
+}
+
+function applyCardSize(val) {
+  cardSize = parseInt(val);
+  document.getElementById('card-sz-val').textContent = val + 'px';
+  document.querySelectorAll('.card').forEach(c => {
+    c.style.width  = val + 'px';
+    c.style.height = val + 'px';
+  });
+}
+
+function applyZoom(val) {
+  document.getElementById('sym-zoom-val').textContent = val + '%';
+  const scale = val / 100;
+  document.querySelectorAll('.symbol img').forEach(img => {
+    img.style.transform = `scale(${scale})`;
+    img.style.transformOrigin = 'center center';
+  });
+}
+
+function applyFit(mode) {
+  currentFit = mode;
+  document.querySelectorAll('.symbol img').forEach(img => {
+    img.style.objectFit = mode;
+  });
+}
+
+function updatePerPage() {
+  if (generated) insertPageBreaks();
+}
+
+function insertPageBreaks() {
+  const perPage = parseInt(document.getElementById('per-page').value);
+  const grid = document.getElementById('cards-grid');
+  grid.querySelectorAll('.page-break').forEach(el => el.remove());
+  const allCards = Array.from(grid.querySelectorAll('.card'));
+  allCards.forEach((card, i) => {
+    if ((i + 1) % perPage === 0 && i !== allCards.length - 1) {
+      const br = document.createElement('div');
+      br.className = 'page-break';
+      card.after(br);
+    }
+  });
+  const cols = perPage === 9 ? 3 : 2;
+  grid.style.setProperty('--print-cols', cols);
 }
 
 function clearAll() {
