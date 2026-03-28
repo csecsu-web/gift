@@ -4,109 +4,164 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Spottix — Custom Matching Card Game Generator | Realm Forge</title>
-<meta name="description" content="Create your own Spottix matching card game with 31 custom images. Every pair of cards shares exactly one symbol. Print at home on A4 paper — free, instant, no signup.">
-<meta name="keywords" content="custom matching card game, spot it generator, dobble maker, printable card game, symbol matching game, print and play card game">
-<meta property="og:title" content="Spottix — Custom Matching Card Game Generator">
-<meta property="og:description" content="Upload 31 images and generate a printable matching card game where every pair of cards shares exactly one symbol.">
-<meta property="og:type" content="website">
+<meta name="description" content="Create your own Spottix matching card game with 31 custom images. Every pair of cards shares exactly one symbol. Print at home on A4 paper.">
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:Arial, sans-serif; background:#f0f2f5; padding:20px; }
-  .panel { background:white; border-radius:10px; padding:24px; max-width:900px; margin:0 auto 20px; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
-  .back { display:inline-block; margin-bottom:16px; color:#5a3ecb; font-weight:bold; text-decoration:none; font-size:14px; }
-  .back:hover { text-decoration:underline; }
-  h1 { color:#2c2c54; margin-bottom:4px; }
-  .subtitle { color:#999; font-size:0.9em; font-style:italic; margin-bottom:20px; }
-  label { font-weight:bold; display:block; margin-bottom:6px; color:#444; }
-  input[type=file] { width:100%; padding:10px; border:2px dashed #aaa; border-radius:8px; margin-bottom:12px; cursor:pointer; }
-  .thumbs { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
-  .thumb { width:60px; height:60px; border-radius:6px; object-fit:cover; border:2px solid #ddd; }
-  .count { font-size:14px; color:#666; margin-bottom:16px; }
-  .count span { font-weight:bold; color:#5a3ecb; }
-  .row { display:flex; align-items:center; gap:16px; margin-bottom:16px; flex-wrap:wrap; }
-  .row label { margin:0; white-space:nowrap; }
-  select { padding:8px 12px; border:1px solid #ccc; border-radius:8px; font-size:14px; }
-  .btns { display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; }
-  button { padding:12px 24px; border:none; border-radius:8px; font-size:15px; font-weight:bold; cursor:pointer; }
-  .btn-gen { background:#5a3ecb; color:white; }
-  .btn-print { background:#27ae60; color:white; display:none; }
-  .btn-clear { background:#e74c3c; color:white; }
-  .error { background:#ffe0e0; color:#c0392b; padding:12px; border-radius:8px; margin-top:12px; display:none; }
-  .how { background:#f5f3ff; border-left:4px solid #5a3ecb; padding:14px 16px; border-radius:0 8px 8px 0; margin-bottom:20px; font-size:14px; color:#444; line-height:1.6; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:Arial, sans-serif; background:#f0f2f5; padding:20px; }
 
-  .size-controls { background:#f8f8ff; border:1px solid #dde; border-radius:8px; padding:16px; margin-bottom:16px; display:none; }
-  .size-controls h3 { font-size:14px; color:#444; margin-bottom:14px; }
-  .slider-row { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
-  .slider-row .lbl { font-size:13px; color:#555; min-width:140px; }
-  input[type=range] { flex:1; cursor:pointer; accent-color:#5a3ecb; }
-  .slider-val { font-size:13px; font-weight:bold; color:#5a3ecb; min-width:44px; text-align:right; }
-  .fit-row { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
-  .fit-row .lbl { font-size:13px; color:#555; min-width:140px; }
-  .fit-row label { font-size:13px; color:#444; cursor:pointer; display:flex; align-items:center; gap:5px; font-weight:normal; }
+.panel {
+  background:white; border-radius:10px; padding:24px;
+  max-width:860px; margin:0 auto 20px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+.back { display:inline-block; margin-bottom:16px; color:#5a3ecb; font-weight:bold; text-decoration:none; font-size:14px; }
+.back:hover { text-decoration:underline; }
+h1 { color:#2c2c54; margin-bottom:4px; }
+.subtitle { color:#999; font-size:0.9em; font-style:italic; margin-bottom:20px; }
+.how { background:#f5f3ff; border-left:4px solid #5a3ecb; padding:14px 16px; border-radius:0 8px 8px 0; margin-bottom:20px; font-size:14px; color:#444; line-height:1.6; }
 
-  #cards-section { display:none; background:white; }
+label.blk { font-weight:bold; display:block; margin-bottom:6px; color:#444; }
+input[type=file] { width:100%; padding:10px; border:2px dashed #aaa; border-radius:8px; margin-bottom:12px; cursor:pointer; }
 
-  .cards-grid {
-    display:flex;
-    flex-wrap:wrap;
-    justify-content:center;
-    gap:14px;
-    padding:20px;
+.thumbs { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+.thumb  { width:56px; height:56px; border-radius:6px; object-fit:cover; border:2px solid #ddd; }
+.count  { font-size:13px; color:#666; margin-bottom:16px; }
+.count b { color:#5a3ecb; }
+
+/* Controls row */
+.ctrl-row { display:flex; align-items:center; gap:14px; margin-bottom:14px; flex-wrap:wrap; }
+.ctrl-row label { font-size:13px; color:#555; white-space:nowrap; }
+select { padding:7px 11px; border:1px solid #ccc; border-radius:7px; font-size:14px; }
+
+/* Sliders */
+.sc { background:#f8f8ff; border:1px solid #dde; border-radius:8px; padding:14px 16px; margin-bottom:16px; display:none; }
+.sc h3 { font-size:13px; color:#444; margin-bottom:12px; font-weight:bold; }
+.sr { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.sr .lb { font-size:13px; color:#555; min-width:150px; }
+input[type=range] { flex:1; cursor:pointer; accent-color:#5a3ecb; }
+.sv { font-size:13px; font-weight:bold; color:#5a3ecb; min-width:42px; text-align:right; }
+.fr { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-top:2px; }
+.fr .lb { font-size:13px; color:#555; min-width:150px; }
+.fr label { font-size:13px; color:#444; cursor:pointer; display:flex; align-items:center; gap:4px; font-weight:normal; }
+
+/* Buttons */
+.btns { display:flex; gap:10px; flex-wrap:wrap; margin-top:4px; }
+button { padding:11px 22px; border:none; border-radius:8px; font-size:14px; font-weight:bold; cursor:pointer; }
+.btn-gen   { background:#5a3ecb; color:white; }
+.btn-print { background:#27ae60; color:white; display:none; }
+.btn-clear { background:#e74c3c; color:white; }
+.error { background:#ffe0e0; color:#c0392b; padding:11px; border-radius:8px; margin-top:10px; display:none; font-size:14px; }
+
+/* ── CARD PAGES ── */
+#cards-section { display:none; }
+
+/*
+ * Each .card-page holds exactly N cards (4, 6, or 9).
+ * Cards are sized to fit the page — never overflow.
+ * page-break-inside:avoid on both the page div and each card.
+ */
+.card-page {
+  background:white;
+  width:100%;
+  max-width:800px;
+  margin:0 auto 20px;
+  padding:12px;
+  border:1px solid #ddd;
+  border-radius:8px;
+  display:grid;
+  page-break-inside:avoid;
+  break-inside:avoid;
+}
+
+/* Grid layouts per page size */
+.card-page.layout-4 { grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:12px; aspect-ratio:0.707; /* A4 ratio */ }
+.card-page.layout-6 { grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr 1fr; gap:10px; aspect-ratio:0.707; }
+.card-page.layout-9 { grid-template-columns:1fr 1fr 1fr; grid-template-rows:1fr 1fr 1fr; gap:8px; aspect-ratio:0.707; }
+
+.page-label {
+  font-size:11px; color:#aaa; text-align:center;
+  margin-bottom:8px; grid-column:1/-1;
+}
+
+/* Each card is a circle that fully fills its grid cell */
+.card-slot {
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  page-break-inside:avoid;
+  break-inside:avoid;
+}
+
+.card {
+  /* Size is 100% of the slot, capped so it stays circular */
+  width:100%;
+  aspect-ratio:1/1;
+  border:3px solid #2c2c54;
+  border-radius:50%;
+  background:white;
+  overflow:hidden;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  grid-template-rows:repeat(2,1fr);
+  gap:2px;
+  padding:10px;
+  page-break-inside:avoid;
+  break-inside:avoid;
+}
+
+.symbol {
+  overflow:hidden;
+  border-radius:3px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#f5f5f5;
+  min-width:0;
+  min-height:0;
+}
+.symbol img {
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:cover;
+}
+
+.card-num {
+  position:absolute;
+  top:2px; left:50%;
+  transform:translateX(-50%);
+  background:#5a3ecb; color:white;
+  padding:1px 7px;
+  border-radius:10px; font-size:10px; font-weight:bold;
+  white-space:nowrap; z-index:2;
+  pointer-events:none;
+}
+
+/* ── PRINT ── */
+@media print {
+  body { background:white; margin:0; padding:0; }
+  .panel, .sc { display:none !important; }
+  #cards-section { display:block !important; }
+
+  .card-page {
+    width:210mm;
+    max-width:none;
+    height:297mm;
+    margin:0;
+    padding:8mm;
+    border:none;
+    border-radius:0;
+    page-break-after:always;
+    break-after:page;
   }
+  .card-page:last-child { page-break-after:avoid; break-after:avoid; }
+  .page-label { display:none; }
 
-  .card {
-    border:3px solid #2c2c54;
-    border-radius:50%;
-    background:white;
-    position:relative;
-    flex-shrink:0;
-    overflow:hidden;
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    grid-template-rows:repeat(2,1fr);
-    gap:2px;
-    padding:12px;
-  }
-
-  .symbol {
-    overflow:hidden;
-    border-radius:3px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:#f5f5f5;
-    min-width:0;
-    min-height:0;
-  }
-  .symbol img {
-    width:100%;
-    height:100%;
-    display:block;
-    /* object-fit set by JS */
-  }
-
-  .card-num {
-    position:absolute; top:6px; left:50%; transform:translateX(-50%);
-    background:#5a3ecb; color:white; padding:1px 7px;
-    border-radius:10px; font-size:10px; font-weight:bold; white-space:nowrap; z-index:2;
-  }
-
-  @media print {
-    body { background:white; margin:0; padding:0; }
-    .panel, .size-controls { display:none !important; }
-    #cards-section { display:block !important; }
-    .cards-grid {
-      display:grid !important;
-      grid-template-columns: repeat(2, 1fr) !important;
-      gap:6mm !important;
-      padding:6mm !important;
-      width:210mm;
-      box-sizing:border-box;
-    }
-    .card { width:auto !important; height:auto !important; aspect-ratio:1/1; border-radius:50%; padding:10px; }
-    .card-num { display:none; }
-    .page-break { page-break-after:always; grid-column:1/-1; height:0; }
-  }
+  /* Cards fill the grid cells exactly, never cut */
+  .card { padding:8px; }
+  .card-num { display:none; }
+}
 </style>
 </head>
 <body>
@@ -117,37 +172,33 @@
   <p class="subtitle">The symbol matching card game</p>
 
   <div class="how">
-    <strong>How it works:</strong> Upload 31 images — they become your symbols. Spottix generates 31 circular cards with 6 symbols each. Every single pair of cards shares exactly one matching symbol. Print, cut, and play!
+    <strong>How it works:</strong> Upload 31 images. Spottix generates 31 circular cards with 6 symbols each — every pair of cards shares exactly one matching symbol. Cards are laid out so they never get cut across pages.
   </div>
 
-  <label>Upload your 31 images:</label>
+  <label class="blk">Upload your 31 images:</label>
   <input type="file" id="img-input" multiple accept="image/*">
   <div class="thumbs" id="thumbs"></div>
-  <div class="count">Images loaded: <span id="img-count">0</span> / 31</div>
+  <div class="count">Loaded: <b id="img-count">0</b> / 31</div>
 
-  <div class="row">
+  <div class="ctrl-row">
     <label>Cards per page:</label>
-    <select id="per-page" onchange="updatePerPage()">
-      <option value="4">4 per page (large, easy to cut)</option>
-      <option value="6" selected>6 per page (recommended)</option>
-      <option value="9">9 per page (compact)</option>
+    <select id="per-page" onchange="if(generated) buildPages()">
+      <option value="4">4 per page — 2×2 (large, easiest to cut)</option>
+      <option value="6" selected>6 per page — 2×3 (recommended)</option>
+      <option value="9">9 per page — 3×3 (compact)</option>
     </select>
   </div>
 
-  <div class="size-controls" id="size-controls">
-    <h3>🖼️ Image Display Settings</h3>
-    <div class="slider-row">
-      <span class="lbl">Card size:</span>
-      <input type="range" id="card-sz" min="120" max="310" value="200" oninput="applyCardSize(this.value)">
-      <span class="slider-val" id="card-sz-val">200px</span>
+  <!-- display controls shown after generate -->
+  <div class="sc" id="sc">
+    <h3>🖼️ Image Display</h3>
+    <div class="sr">
+      <span class="lb">Symbol zoom:</span>
+      <input type="range" id="zoom" min="60" max="140" value="100" oninput="applyZoom(this.value)">
+      <span class="sv" id="zoom-v">100%</span>
     </div>
-    <div class="slider-row">
-      <span class="lbl">Symbol zoom:</span>
-      <input type="range" id="sym-zoom" min="60" max="140" value="100" oninput="applyZoom(this.value)">
-      <span class="slider-val" id="sym-zoom-val">100%</span>
-    </div>
-    <div class="fit-row">
-      <span class="lbl">Image fit:</span>
+    <div class="fr">
+      <span class="lb">Fit:</span>
       <label><input type="radio" name="fit" value="cover" checked onchange="applyFit('cover')"> Crop to fill</label>
       <label><input type="radio" name="fit" value="contain" onchange="applyFit('contain')"> Show full photo</label>
     </div>
@@ -155,66 +206,63 @@
 
   <div class="btns">
     <button class="btn-gen" onclick="generate()">Generate Cards</button>
-    <button class="btn-print" id="print-btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
+    <button class="btn-print" id="print-btn" onclick="window.print()">🖨️ Print / Save PDF</button>
     <button class="btn-clear" onclick="clearAll()">Clear</button>
   </div>
-  <div class="error" id="error-msg"></div>
+  <div class="error" id="err"></div>
 </div>
 
-<div id="cards-section">
-  <div class="cards-grid" id="cards-grid"></div>
-</div>
+<div id="cards-section" id="output"></div>
 
 <script>
 let images = [];
 let loadedCount = 0;
 let generated = false;
-let cardSize = 200;
+let cardSets = [];
 let currentFit = 'cover';
 
-// Read full-res images — NO canvas shrinking = sharp photos
+// Load images at FULL quality — no canvas resize
 document.getElementById('img-input').addEventListener('change', function(e) {
-  images = [];
-  loadedCount = 0;
+  images = []; loadedCount = 0;
   document.getElementById('thumbs').innerHTML = '';
   document.getElementById('img-count').textContent = '0';
   Array.from(e.target.files).forEach((file, i) => {
-    const reader = new FileReader();
-    reader.onload = ev => {
-      images[i] = ev.target.result; // full resolution, untouched
+    const r = new FileReader();
+    r.onload = ev => {
+      images[i] = ev.target.result;
       loadedCount++;
       document.getElementById('img-count').textContent = loadedCount;
       const img = document.createElement('img');
-      img.className = 'thumb';
-      img.src = ev.target.result;
+      img.className = 'thumb'; img.src = ev.target.result;
       document.getElementById('thumbs').appendChild(img);
     };
-    reader.readAsDataURL(file);
+    r.readAsDataURL(file);
   });
 });
 
+// Dobble math — projective plane order 5 → 31 cards, 6 symbols each
 function generateCardSets() {
   const n = 5, cards = [];
   const first = [];
   for (let i = 0; i <= n; i++) first.push(i);
   cards.push(first);
   for (let r = 0; r < n; r++) {
-    const card = [0];
-    for (let c2 = 0; c2 < n; c2++) card.push(n + 1 + r * n + c2);
-    cards.push(card);
+    const c = [0];
+    for (let j = 0; j < n; j++) c.push(n + 1 + r * n + j);
+    cards.push(c);
   }
   for (let r = 0; r < n; r++) {
-    for (let c2 = 0; c2 < n; c2++) {
+    for (let c = 0; c < n; c++) {
       const card = [r + 1];
-      for (let k = 0; k < n; k++) card.push(n + 1 + k * n + ((c2 + r * k) % n));
+      for (let k = 0; k < n; k++) card.push(n + 1 + k * n + ((c + r * k) % n));
       cards.push(card);
     }
   }
-  return cards;
+  return cards; // 31 cards
 }
 
 function generate() {
-  const errEl = document.getElementById('error-msg');
+  const errEl = document.getElementById('err');
   errEl.style.display = 'none';
   const filled = images.filter(Boolean).length;
   if (filled < 31) {
@@ -222,58 +270,88 @@ function generate() {
     errEl.style.display = 'block';
     return;
   }
-  const cards = generateCardSets();
-  const grid = document.getElementById('cards-grid');
-  grid.innerHTML = '';
-
-  cards.forEach((symbolList, idx) => {
-    const cardEl = document.createElement('div');
-    cardEl.className = 'card';
-    cardEl.style.width  = cardSize + 'px';
-    cardEl.style.height = cardSize + 'px';
-
-    const numEl = document.createElement('div');
-    numEl.className = 'card-num';
-    numEl.textContent = '#' + (idx + 1);
-    cardEl.appendChild(numEl);
-
-    symbolList.forEach(symIdx => {
-      const sym = document.createElement('div');
-      sym.className = 'symbol';
-      const imgEl = document.createElement('img');
-      imgEl.src = images[symIdx];
-      imgEl.style.objectFit = currentFit;
-      imgEl.alt = '';
-      sym.appendChild(imgEl);
-      cardEl.appendChild(sym);
-    });
-
-    grid.appendChild(cardEl);
-  });
-
+  cardSets = generateCardSets();
   generated = true;
-  insertPageBreaks();
+  buildPages();
   document.getElementById('cards-section').style.display = 'block';
   document.getElementById('print-btn').style.display = 'inline-block';
-  document.getElementById('size-controls').style.display = 'block';
+  document.getElementById('sc').style.display = 'block';
   document.getElementById('cards-section').scrollIntoView({ behavior:'smooth' });
 }
 
-function applyCardSize(val) {
-  cardSize = parseInt(val);
-  document.getElementById('card-sz-val').textContent = val + 'px';
-  document.querySelectorAll('.card').forEach(c => {
-    c.style.width  = val + 'px';
-    c.style.height = val + 'px';
-  });
+function buildPages() {
+  const perPage = parseInt(document.getElementById('per-page').value);
+  const section = document.getElementById('cards-section');
+  section.innerHTML = '';
+
+  // Split 31 cards into pages of perPage
+  for (let pageStart = 0; pageStart < cardSets.length; pageStart += perPage) {
+    const pageCards = cardSets.slice(pageStart, pageStart + perPage);
+    const pageNum = Math.floor(pageStart / perPage) + 1;
+    const totalPages = Math.ceil(cardSets.length / perPage);
+
+    const page = document.createElement('div');
+    page.className = `card-page layout-${perPage}`;
+
+    // Page label (screen only, hidden on print)
+    const lbl = document.createElement('div');
+    lbl.className = 'page-label';
+    lbl.textContent = `Page ${pageNum} of ${totalPages}`;
+    page.appendChild(lbl);
+
+    pageCards.forEach((symbolList, localIdx) => {
+      const globalIdx = pageStart + localIdx;
+      const slot = document.createElement('div');
+      slot.className = 'card-slot';
+
+      const numEl = document.createElement('div');
+      numEl.className = 'card-num';
+      numEl.textContent = '#' + (globalIdx + 1);
+      slot.appendChild(numEl);
+
+      const cardEl = document.createElement('div');
+      cardEl.className = 'card';
+
+      symbolList.forEach(symIdx => {
+        const sym = document.createElement('div');
+        sym.className = 'symbol';
+        const imgEl = document.createElement('img');
+        imgEl.src = images[symIdx];
+        imgEl.style.objectFit = currentFit;
+        imgEl.alt = '';
+        sym.appendChild(imgEl);
+        cardEl.appendChild(sym);
+      });
+
+      slot.appendChild(cardEl);
+      page.appendChild(slot);
+    });
+
+    // If last page is not full, add empty slots so grid stays consistent
+    const remainder = pageCards.length % perPage;
+    if (remainder !== 0) {
+      const blanks = perPage - remainder;
+      for (let b = 0; b < blanks; b++) {
+        const blank = document.createElement('div');
+        blank.className = 'card-slot';
+        page.appendChild(blank);
+      }
+    }
+
+    section.appendChild(page);
+  }
+
+  // Reapply display settings
+  applyZoom(document.getElementById('zoom').value);
+  applyFit(currentFit);
 }
 
 function applyZoom(val) {
-  document.getElementById('sym-zoom-val').textContent = val + '%';
+  document.getElementById('zoom-v').textContent = val + '%';
   const scale = val / 100;
   document.querySelectorAll('.symbol img').forEach(img => {
     img.style.transform = `scale(${scale})`;
-    img.style.transformOrigin = 'center center';
+    img.style.transformOrigin = 'center';
   });
 }
 
@@ -284,36 +362,16 @@ function applyFit(mode) {
   });
 }
 
-function updatePerPage() {
-  if (generated) insertPageBreaks();
-}
-
-function insertPageBreaks() {
-  const perPage = parseInt(document.getElementById('per-page').value);
-  const grid = document.getElementById('cards-grid');
-  grid.querySelectorAll('.page-break').forEach(el => el.remove());
-  const allCards = Array.from(grid.querySelectorAll('.card'));
-  allCards.forEach((card, i) => {
-    if ((i + 1) % perPage === 0 && i !== allCards.length - 1) {
-      const br = document.createElement('div');
-      br.className = 'page-break';
-      card.after(br);
-    }
-  });
-  const cols = perPage === 9 ? 3 : 2;
-  grid.style.setProperty('--print-cols', cols);
-}
-
 function clearAll() {
-  images = []; loadedCount = 0; generated = false;
+  images = []; loadedCount = 0; generated = false; cardSets = [];
   document.getElementById('img-input').value = '';
   document.getElementById('thumbs').innerHTML = '';
   document.getElementById('img-count').textContent = '0';
-  document.getElementById('cards-grid').innerHTML = '';
+  document.getElementById('cards-section').innerHTML = '';
   document.getElementById('cards-section').style.display = 'none';
   document.getElementById('print-btn').style.display = 'none';
-  document.getElementById('size-controls').style.display = 'none';
-  document.getElementById('error-msg').style.display = 'none';
+  document.getElementById('sc').style.display = 'none';
+  document.getElementById('err').style.display = 'none';
 }
 </script>
 </body>
