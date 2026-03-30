@@ -3,164 +3,63 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Spottix — Custom Matching Card Game Generator | Realm Forge</title>
-<meta name="description" content="Create your own Spottix matching card game with 31 custom images. Every pair of cards shares exactly one symbol. Print at home on A4 paper.">
+<title>Spottix — Realm Forge</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:Arial, sans-serif; background:#f0f2f5; padding:20px; }
-
-.panel {
-  background:white; border-radius:10px; padding:24px;
-  max-width:860px; margin:0 auto 20px;
-  box-shadow:0 2px 8px rgba(0,0,0,0.1);
-}
-.back { display:inline-block; margin-bottom:16px; color:#5a3ecb; font-weight:bold; text-decoration:none; font-size:14px; }
-.back:hover { text-decoration:underline; }
-h1 { color:#2c2c54; margin-bottom:4px; }
-.subtitle { color:#999; font-size:0.9em; font-style:italic; margin-bottom:20px; }
-.how { background:#f5f3ff; border-left:4px solid #5a3ecb; padding:14px 16px; border-radius:0 8px 8px 0; margin-bottom:20px; font-size:14px; color:#444; line-height:1.6; }
-
-label.blk { font-weight:bold; display:block; margin-bottom:6px; color:#444; }
-input[type=file] { width:100%; padding:10px; border:2px dashed #aaa; border-radius:8px; margin-bottom:12px; cursor:pointer; }
-
-.thumbs { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
-.thumb  { width:56px; height:56px; border-radius:6px; object-fit:cover; border:2px solid #ddd; }
-.count  { font-size:13px; color:#666; margin-bottom:16px; }
+body { font-family:Arial,sans-serif; background:#f0f2f5; padding:20px; }
+.panel { background:white; border-radius:10px; padding:24px; max-width:820px; margin:0 auto 20px; box-shadow:0 2px 8px rgba(0,0,0,.1); }
+.back { display:inline-block; margin-bottom:14px; color:#5a3ecb; font-weight:bold; text-decoration:none; font-size:14px; }
+h1 { color:#2c2c54; margin-bottom:3px; }
+.sub { color:#999; font-size:.9em; font-style:italic; margin-bottom:18px; }
+.how { background:#f5f3ff; border-left:4px solid #5a3ecb; padding:13px 15px; border-radius:0 8px 8px 0; margin-bottom:18px; font-size:13.5px; color:#444; line-height:1.6; }
+label.lbl { font-weight:bold; display:block; margin-bottom:5px; color:#444; font-size:14px; }
+input[type=file] { width:100%; padding:9px; border:2px dashed #aaa; border-radius:8px; margin-bottom:10px; cursor:pointer; }
+.thumbs { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:8px; }
+.thumb { width:54px; height:54px; border-radius:6px; object-fit:cover; border:2px solid #ddd; }
+.count { font-size:13px; color:#666; margin-bottom:14px; }
 .count b { color:#5a3ecb; }
-
-/* Controls row */
-.ctrl-row { display:flex; align-items:center; gap:14px; margin-bottom:14px; flex-wrap:wrap; }
-.ctrl-row label { font-size:13px; color:#555; white-space:nowrap; }
+.row { display:flex; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
+.row label { font-size:13px; color:#555; }
 select { padding:7px 11px; border:1px solid #ccc; border-radius:7px; font-size:14px; }
+.btns { display:flex; gap:10px; flex-wrap:wrap; margin-top:6px; }
+button { padding:11px 22px; border:none; border-radius:8px; font-size:14px; font-weight:bold; cursor:pointer; transition:opacity .15s; }
+button:hover { opacity:.88; }
+.btn-gen  { background:#5a3ecb; color:white; }
+.btn-pdf  { background:#e67e22; color:white; display:none; }
+.btn-print{ background:#27ae60; color:white; display:none; }
+.btn-clr  { background:#e74c3c; color:white; }
+.err { background:#ffe0e0; color:#c0392b; padding:10px 13px; border-radius:8px; margin-top:10px; display:none; font-size:13px; }
+.info { background:#fff8e1; color:#7d5a00; padding:10px 13px; border-radius:8px; margin-top:10px; font-size:13px; display:none; }
 
-/* Sliders */
-.sc { background:#f8f8ff; border:1px solid #dde; border-radius:8px; padding:14px 16px; margin-bottom:16px; display:none; }
-.sc h3 { font-size:13px; color:#444; margin-bottom:12px; font-weight:bold; }
-.sr { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
-.sr .lb { font-size:13px; color:#555; min-width:150px; }
-input[type=range] { flex:1; cursor:pointer; accent-color:#5a3ecb; }
-.sv { font-size:13px; font-weight:bold; color:#5a3ecb; min-width:42px; text-align:right; }
-.fr { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-top:2px; }
-.fr .lb { font-size:13px; color:#555; min-width:150px; }
-.fr label { font-size:13px; color:#444; cursor:pointer; display:flex; align-items:center; gap:4px; font-weight:normal; }
-
-/* Buttons */
-.btns { display:flex; gap:10px; flex-wrap:wrap; margin-top:4px; }
-button { padding:11px 22px; border:none; border-radius:8px; font-size:14px; font-weight:bold; cursor:pointer; }
-.btn-gen   { background:#5a3ecb; color:white; }
-.btn-print { background:#27ae60; color:white; display:none; }
-.btn-clear { background:#e74c3c; color:white; }
-.error { background:#ffe0e0; color:#c0392b; padding:11px; border-radius:8px; margin-top:10px; display:none; font-size:14px; }
-
-/* ── CARD PAGES ── */
-#cards-section { display:none; }
-
-/*
- * Each .card-page holds exactly N cards (4, 6, or 9).
- * Cards are sized to fit the page — never overflow.
- * page-break-inside:avoid on both the page div and each card.
- */
-.card-page {
-  background:white;
-  width:100%;
-  max-width:800px;
-  margin:0 auto 20px;
-  padding:12px;
-  border:1px solid #ddd;
-  border-radius:8px;
-  display:grid;
-  page-break-inside:avoid;
-  break-inside:avoid;
-}
-
-/* Grid layouts per page size */
-.card-page.layout-4 { grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:12px; aspect-ratio:0.707; /* A4 ratio */ }
-.card-page.layout-6 { grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr 1fr; gap:10px; aspect-ratio:0.707; }
-.card-page.layout-9 { grid-template-columns:1fr 1fr 1fr; grid-template-rows:1fr 1fr 1fr; gap:8px; aspect-ratio:0.707; }
-
-.page-label {
-  font-size:11px; color:#aaa; text-align:center;
-  margin-bottom:8px; grid-column:1/-1;
-}
-
-/* Each card is a circle that fully fills its grid cell */
-.card-slot {
-  position:relative;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  page-break-inside:avoid;
-  break-inside:avoid;
-}
-
-.card {
-  /* Size is 100% of the slot, capped so it stays circular */
-  width:100%;
-  aspect-ratio:1/1;
-  border:3px solid #2c2c54;
+/* Preview canvas grid */
+#preview { display:none; margin-top:16px; }
+#preview h3 { font-size:14px; color:#444; margin-bottom:10px; }
+.canvas-grid { display:flex; flex-wrap:wrap; gap:10px; }
+canvas.card-canvas {
   border-radius:50%;
-  background:white;
-  overflow:hidden;
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  grid-template-rows:repeat(2,1fr);
-  gap:2px;
-  padding:10px;
-  page-break-inside:avoid;
-  break-inside:avoid;
-}
-
-.symbol {
-  overflow:hidden;
-  border-radius:3px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:#f5f5f5;
-  min-width:0;
-  min-height:0;
-}
-.symbol img {
-  width:100%;
-  height:100%;
+  border:3px solid #2c2c54;
   display:block;
-  object-fit:cover;
+  /* size set by JS */
 }
 
-.card-num {
-  position:absolute;
-  top:2px; left:50%;
-  transform:translateX(-50%);
-  background:#5a3ecb; color:white;
-  padding:1px 7px;
-  border-radius:10px; font-size:10px; font-weight:bold;
-  white-space:nowrap; z-index:2;
-  pointer-events:none;
-}
-
-/* ── PRINT ── */
 @media print {
-  body { background:white; margin:0; padding:0; }
-  .panel, .sc { display:none !important; }
-  #cards-section { display:block !important; }
-
-  .card-page {
+  .panel { display:none !important; }
+  #preview { display:block !important; }
+  #preview h3 { display:none; }
+  .canvas-grid {
+    display:grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap:6mm !important;
+    padding:6mm !important;
     width:210mm;
-    max-width:none;
-    height:297mm;
-    margin:0;
-    padding:8mm;
-    border:none;
-    border-radius:0;
-    page-break-after:always;
-    break-after:page;
+    box-sizing:border-box;
   }
-  .card-page:last-child { page-break-after:avoid; break-after:avoid; }
-  .page-label { display:none; }
-
-  /* Cards fill the grid cells exactly, never cut */
-  .card { padding:8px; }
-  .card-num { display:none; }
+  canvas.card-canvas {
+    width:100% !important;
+    height:auto !important;
+    page-break-inside:avoid;
+    break-inside:avoid;
+  }
 }
 </style>
 </head>
@@ -169,79 +68,81 @@ button { padding:11px 22px; border:none; border-radius:8px; font-size:14px; font
 <div class="panel">
   <a class="back" href="index.html">← Back to Realm Forge</a>
   <h1>🎯 Spottix</h1>
-  <p class="subtitle">The symbol matching card game</p>
+  <p class="sub">The symbol matching card game</p>
 
   <div class="how">
-    <strong>How it works:</strong> Upload 31 images. Spottix generates 31 circular cards with 6 symbols each — every pair of cards shares exactly one matching symbol. Cards are laid out so they never get cut across pages.
+    <strong>How it works:</strong> Upload 31 photos. Spottix places 6 symbols on each of the 31 cards at different sizes and angles — just like real Dobble. Every pair of cards shares exactly one matching symbol. Download as PDF or print directly!
   </div>
 
-  <label class="blk">Upload your 31 images:</label>
+  <label class="lbl">Upload your 31 images:</label>
   <input type="file" id="img-input" multiple accept="image/*">
   <div class="thumbs" id="thumbs"></div>
   <div class="count">Loaded: <b id="img-count">0</b> / 31</div>
 
-  <div class="ctrl-row">
-    <label>Cards per page:</label>
-    <select id="per-page" onchange="if(generated) buildPages()">
-      <option value="4">4 per page — 2×2 (large, easiest to cut)</option>
-      <option value="6" selected>6 per page — 2×3 (recommended)</option>
-      <option value="9">9 per page — 3×3 (compact)</option>
+  <div class="row">
+    <label>Preview size:</label>
+    <select id="prev-size">
+      <option value="140">Small (fits more on screen)</option>
+      <option value="190" selected>Medium</option>
+      <option value="240">Large</option>
     </select>
   </div>
 
-  <!-- display controls shown after generate -->
-  <div class="sc" id="sc">
-    <h3>🖼️ Image Display</h3>
-    <div class="sr">
-      <span class="lb">Symbol zoom:</span>
-      <input type="range" id="zoom" min="60" max="140" value="100" oninput="applyZoom(this.value)">
-      <span class="sv" id="zoom-v">100%</span>
-    </div>
-    <div class="fr">
-      <span class="lb">Fit:</span>
-      <label><input type="radio" name="fit" value="cover" checked onchange="applyFit('cover')"> Crop to fill</label>
-      <label><input type="radio" name="fit" value="contain" onchange="applyFit('contain')"> Show full photo</label>
-    </div>
-  </div>
-
   <div class="btns">
-    <button class="btn-gen" onclick="generate()">Generate Cards</button>
-    <button class="btn-print" id="print-btn" onclick="window.print()">🖨️ Print / Save PDF</button>
-    <button class="btn-clear" onclick="clearAll()">Clear</button>
+    <button class="btn-gen" onclick="generate()">🎯 Generate Cards</button>
+    <button class="btn-pdf" id="btn-pdf" onclick="downloadPDF()">⬇️ Download PDF</button>
+    <button class="btn-print" id="btn-print" onclick="window.print()">🖨️ Print</button>
+    <button class="btn-clr" onclick="clearAll()">Clear</button>
   </div>
-  <div class="error" id="err"></div>
+  <div class="err" id="err"></div>
+  <div class="info" id="info"></div>
 </div>
 
-<div id="cards-section" id="output"></div>
+<div id="preview">
+  <div class="panel" style="padding:16px;">
+    <h3>Preview — <span id="preview-label"></span></h3>
+    <div class="canvas-grid" id="canvas-grid"></div>
+  </div>
+</div>
+
+<!-- jsPDF for PDF generation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
-let images = [];
+let images = [];       // full-res data URLs
+let imgObjs = [];      // Image() objects (preloaded)
 let loadedCount = 0;
 let generated = false;
 let cardSets = [];
-let currentFit = 'cover';
+const CARD_RENDER_SIZE = 600; // internal canvas resolution (sharp!)
 
-// Load images at FULL quality — no canvas resize
+/* ── Load images at full quality ── */
 document.getElementById('img-input').addEventListener('change', function(e) {
-  images = []; loadedCount = 0;
+  images = []; imgObjs = []; loadedCount = 0;
   document.getElementById('thumbs').innerHTML = '';
   document.getElementById('img-count').textContent = '0';
-  Array.from(e.target.files).forEach((file, i) => {
-    const r = new FileReader();
-    r.onload = ev => {
+  const files = Array.from(e.target.files);
+  files.forEach((file, i) => {
+    const reader = new FileReader();
+    reader.onload = ev => {
       images[i] = ev.target.result;
+      // Preload as Image object
+      const img = new Image();
+      img.src = ev.target.result;
+      imgObjs[i] = img;
       loadedCount++;
       document.getElementById('img-count').textContent = loadedCount;
-      const img = document.createElement('img');
-      img.className = 'thumb'; img.src = ev.target.result;
-      document.getElementById('thumbs').appendChild(img);
+      // Thumbnail
+      const th = document.createElement('img');
+      th.className = 'thumb'; th.src = ev.target.result;
+      document.getElementById('thumbs').appendChild(th);
     };
-    r.readAsDataURL(file);
+    reader.readAsDataURL(file);
   });
 });
 
-// Dobble math — projective plane order 5 → 31 cards, 6 symbols each
-function generateCardSets() {
+/* ── Dobble math: projective plane order 5 → 31 cards, 6 symbols each ── */
+function buildCardSets() {
   const n = 5, cards = [];
   const first = [];
   for (let i = 0; i <= n; i++) first.push(i);
@@ -258,120 +159,258 @@ function generateCardSets() {
       cards.push(card);
     }
   }
-  return cards; // 31 cards
+  return cards;
 }
 
+/* ── Place 6 symbols in a circle, scattered like real Dobble ──
+ * Uses a fixed layout of 6 non-overlapping positions at varied sizes/angles,
+ * all guaranteed to stay inside the circle.
+ */
+function getSymbolLayouts() {
+  // Each: { cx, cy, size, angle } — in unit coords (0-1 of card diameter)
+  // Tuned so all circles stay within the card circle
+  return [
+    { cx: 0.50, cy: 0.25, size: 0.28, angle:  12 },
+    { cx: 0.77, cy: 0.45, size: 0.22, angle: -18 },
+    { cx: 0.68, cy: 0.74, size: 0.25, angle:  25 },
+    { cx: 0.38, cy: 0.78, size: 0.20, angle: -10 },
+    { cx: 0.20, cy: 0.52, size: 0.26, angle:  15 },
+    { cx: 0.32, cy: 0.28, size: 0.21, angle: -20 },
+  ];
+}
+
+/* ── Draw one card on a canvas ──
+ * cardCanvas: HTMLCanvasElement (pre-sized)
+ * symbols: array of 6 image indices
+ */
+function drawCard(cardCanvas, symbols, cardIndex) {
+  const sz = cardCanvas.width; // square canvas
+  const ctx = cardCanvas.getContext('2d');
+  const r = sz / 2;
+
+  // Background
+  ctx.clearRect(0, 0, sz, sz);
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(r, r, r - 4, 0, Math.PI * 2);
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();
+  ctx.restore();
+
+  // Subtle background circle decoration
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(r, r, r - 4, 0, Math.PI * 2);
+  ctx.strokeStyle = '#2c2c54';
+  ctx.lineWidth = Math.max(3, sz * 0.006);
+  ctx.stroke();
+  ctx.restore();
+
+  const layouts = getSymbolLayouts();
+
+  symbols.forEach((symIdx, i) => {
+    const layout = layouts[i];
+    const imgObj = imgObjs[symIdx];
+    if (!imgObj || !imgObj.complete) return;
+
+    const symPx = layout.size * sz;      // size of symbol in pixels
+    const cx = layout.cx * sz;
+    const cy = layout.cy * sz;
+    const angleDeg = layout.angle;
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(angleDeg * Math.PI / 180);
+
+    // Clip to rounded square for the symbol
+    const half = symPx / 2;
+    const rad  = symPx * 0.18;
+    ctx.beginPath();
+    ctx.moveTo(-half + rad, -half);
+    ctx.lineTo( half - rad, -half);
+    ctx.quadraticCurveTo( half, -half,  half, -half + rad);
+    ctx.lineTo( half,  half - rad);
+    ctx.quadraticCurveTo( half,  half,  half - rad,  half);
+    ctx.lineTo(-half + rad,  half);
+    ctx.quadraticCurveTo(-half,  half, -half,  half - rad);
+    ctx.lineTo(-half, -half + rad);
+    ctx.quadraticCurveTo(-half, -half, -half + rad, -half);
+    ctx.closePath();
+    ctx.clip();
+
+    // Draw image, centered and covering the clip area
+    const iw = imgObj.naturalWidth  || imgObj.width  || 1;
+    const ih = imgObj.naturalHeight || imgObj.height || 1;
+    const scale = Math.max(symPx / iw, symPx / ih);
+    const dw = iw * scale;
+    const dh = ih * scale;
+    ctx.drawImage(imgObj, -dw/2, -dh/2, dw, dh);
+
+    ctx.restore();
+
+    // Thin border around symbol
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(angleDeg * Math.PI / 180);
+    ctx.beginPath();
+    ctx.moveTo(-half + rad, -half);
+    ctx.lineTo( half - rad, -half);
+    ctx.quadraticCurveTo( half, -half,  half, -half + rad);
+    ctx.lineTo( half,  half - rad);
+    ctx.quadraticCurveTo( half,  half,  half - rad,  half);
+    ctx.lineTo(-half + rad,  half);
+    ctx.quadraticCurveTo(-half,  half, -half,  half - rad);
+    ctx.lineTo(-half, -half + rad);
+    ctx.quadraticCurveTo(-half, -half, -half + rad, -half);
+    ctx.closePath();
+    ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+    ctx.lineWidth = Math.max(1, sz * 0.003);
+    ctx.stroke();
+    ctx.restore();
+  });
+
+  // Card number (small, inside circle at bottom)
+  ctx.save();
+  const fontSize = Math.max(10, sz * 0.055);
+  ctx.font = `bold ${fontSize}px Arial`;
+  ctx.fillStyle = 'rgba(44,44,84,0.5)';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('#' + (cardIndex + 1), r, sz * 0.93);
+  ctx.restore();
+}
+
+/* ── Render all cards as canvases ── */
+function renderAllCards(previewSize) {
+  const grid = document.getElementById('canvas-grid');
+  grid.innerHTML = '';
+
+  cardSets.forEach((symbols, idx) => {
+    const canvas = document.createElement('canvas');
+    canvas.width  = CARD_RENDER_SIZE;
+    canvas.height = CARD_RENDER_SIZE;
+    canvas.className = 'card-canvas';
+    canvas.style.width  = previewSize + 'px';
+    canvas.style.height = previewSize + 'px';
+    canvas.style.borderRadius = '50%';
+    canvas.style.border = '3px solid #2c2c54';
+
+    // Wait for all images to load before drawing
+    waitForImages(symbols, () => {
+      drawCard(canvas, symbols, idx);
+    });
+
+    grid.appendChild(canvas);
+  });
+}
+
+function waitForImages(symbols, cb) {
+  const needed = symbols.map(i => imgObjs[i]).filter(Boolean);
+  let loaded = 0;
+  if (needed.length === 0) { cb(); return; }
+  needed.forEach(img => {
+    if (img.complete) {
+      loaded++;
+      if (loaded === needed.length) cb();
+    } else {
+      img.onload = () => { loaded++; if (loaded === needed.length) cb(); };
+    }
+  });
+}
+
+/* ── Generate ── */
 function generate() {
   const errEl = document.getElementById('err');
   errEl.style.display = 'none';
   const filled = images.filter(Boolean).length;
   if (filled < 31) {
-    errEl.textContent = `Need 31 images. You have ${filled}.`;
+    errEl.textContent = `Need 31 images. You have ${filled}. Please upload more.`;
     errEl.style.display = 'block';
     return;
   }
-  cardSets = generateCardSets();
+
+  cardSets = buildCardSets();
+  const prevSize = parseInt(document.getElementById('prev-size').value);
+
+  document.getElementById('preview-label').textContent = '31 cards generated';
+  renderAllCards(prevSize);
+
+  document.getElementById('preview').style.display = 'block';
+  document.getElementById('btn-pdf').style.display = 'inline-block';
+  document.getElementById('btn-print').style.display = 'inline-block';
   generated = true;
-  buildPages();
-  document.getElementById('cards-section').style.display = 'block';
-  document.getElementById('print-btn').style.display = 'inline-block';
-  document.getElementById('sc').style.display = 'block';
-  document.getElementById('cards-section').scrollIntoView({ behavior:'smooth' });
+
+  document.getElementById('preview').scrollIntoView({ behavior:'smooth' });
 }
 
-function buildPages() {
-  const perPage = parseInt(document.getElementById('per-page').value);
-  const section = document.getElementById('cards-section');
-  section.innerHTML = '';
+/* ── Download PDF ──
+ * Renders each card at high res on a fresh canvas, then places on A4 pages
+ */
+function downloadPDF() {
+  const infoEl = document.getElementById('info');
+  infoEl.textContent = '⏳ Building PDF… this may take a few seconds.';
+  infoEl.style.display = 'block';
 
-  // Split 31 cards into pages of perPage
-  for (let pageStart = 0; pageStart < cardSets.length; pageStart += perPage) {
-    const pageCards = cardSets.slice(pageStart, pageStart + perPage);
-    const pageNum = Math.floor(pageStart / perPage) + 1;
-    const totalPages = Math.ceil(cardSets.length / perPage);
+  // Give the browser a moment to show the message
+  setTimeout(() => {
+    try {
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
 
-    const page = document.createElement('div');
-    page.className = `card-page layout-${perPage}`;
+      const pageW = 210, pageH = 297;
+      const margin = 8;
+      const cardsPerRow = 3;
+      const cardsPerPage = 9; // 3×3
+      const cardMM = (pageW - margin * 2 - (cardsPerRow - 1) * 4) / cardsPerRow; // ~60mm
+      const gap = 4;
 
-    // Page label (screen only, hidden on print)
-    const lbl = document.createElement('div');
-    lbl.className = 'page-label';
-    lbl.textContent = `Page ${pageNum} of ${totalPages}`;
-    page.appendChild(lbl);
+      cardSets.forEach((symbols, idx) => {
+        const pageIdx  = Math.floor(idx / cardsPerPage);
+        const localIdx = idx % cardsPerPage;
 
-    pageCards.forEach((symbolList, localIdx) => {
-      const globalIdx = pageStart + localIdx;
-      const slot = document.createElement('div');
-      slot.className = 'card-slot';
+        // New page
+        if (localIdx === 0 && idx > 0) pdf.addPage();
 
-      const numEl = document.createElement('div');
-      numEl.className = 'card-num';
-      numEl.textContent = '#' + (globalIdx + 1);
-      slot.appendChild(numEl);
+        const col = localIdx % cardsPerRow;
+        const row = Math.floor(localIdx / cardsPerRow);
+        const xMM = margin + col * (cardMM + gap);
+        const yMM = margin + row * (cardMM + gap);
 
-      const cardEl = document.createElement('div');
-      cardEl.className = 'card';
+        // Draw card on offscreen canvas
+        const offscreen = document.createElement('canvas');
+        offscreen.width  = CARD_RENDER_SIZE;
+        offscreen.height = CARD_RENDER_SIZE;
+        drawCard(offscreen, symbols, idx);
 
-      symbolList.forEach(symIdx => {
-        const sym = document.createElement('div');
-        sym.className = 'symbol';
-        const imgEl = document.createElement('img');
-        imgEl.src = images[symIdx];
-        imgEl.style.objectFit = currentFit;
-        imgEl.alt = '';
-        sym.appendChild(imgEl);
-        cardEl.appendChild(sym);
+        const dataUrl = offscreen.toDataURL('image/jpeg', 0.92);
+        // Add as circle clip using jsPDF
+        // jsPDF doesn't natively clip circles, so we draw the full square image
+        // and rely on the white background + drawn circle border
+        pdf.addImage(dataUrl, 'JPEG', xMM, yMM, cardMM, cardMM);
       });
 
-      slot.appendChild(cardEl);
-      page.appendChild(slot);
-    });
-
-    // If last page is not full, add empty slots so grid stays consistent
-    const remainder = pageCards.length % perPage;
-    if (remainder !== 0) {
-      const blanks = perPage - remainder;
-      for (let b = 0; b < blanks; b++) {
-        const blank = document.createElement('div');
-        blank.className = 'card-slot';
-        page.appendChild(blank);
-      }
+      pdf.save('spottix-cards.pdf');
+      infoEl.textContent = '✅ PDF downloaded! Check your Downloads folder.';
+    } catch(e) {
+      document.getElementById('info').style.display = 'none';
+      const errEl = document.getElementById('err');
+      errEl.textContent = 'PDF error: ' + e.message;
+      errEl.style.display = 'block';
     }
-
-    section.appendChild(page);
-  }
-
-  // Reapply display settings
-  applyZoom(document.getElementById('zoom').value);
-  applyFit(currentFit);
-}
-
-function applyZoom(val) {
-  document.getElementById('zoom-v').textContent = val + '%';
-  const scale = val / 100;
-  document.querySelectorAll('.symbol img').forEach(img => {
-    img.style.transform = `scale(${scale})`;
-    img.style.transformOrigin = 'center';
-  });
-}
-
-function applyFit(mode) {
-  currentFit = mode;
-  document.querySelectorAll('.symbol img').forEach(img => {
-    img.style.objectFit = mode;
-  });
+  }, 80);
 }
 
 function clearAll() {
-  images = []; loadedCount = 0; generated = false; cardSets = [];
+  images = []; imgObjs = []; loadedCount = 0; generated = false; cardSets = [];
   document.getElementById('img-input').value = '';
   document.getElementById('thumbs').innerHTML = '';
   document.getElementById('img-count').textContent = '0';
-  document.getElementById('cards-section').innerHTML = '';
-  document.getElementById('cards-section').style.display = 'none';
-  document.getElementById('print-btn').style.display = 'none';
-  document.getElementById('sc').style.display = 'none';
+  document.getElementById('canvas-grid').innerHTML = '';
+  document.getElementById('preview').style.display = 'none';
+  document.getElementById('btn-pdf').style.display = 'none';
+  document.getElementById('btn-print').style.display = 'none';
   document.getElementById('err').style.display = 'none';
+  document.getElementById('info').style.display = 'none';
 }
 </script>
 </body>
