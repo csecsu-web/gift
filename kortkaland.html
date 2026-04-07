@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🍺 KortyKaland — Realm Forge</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#f5f5f0;color:#1a1a1a;min-height:100vh}
+.topbar{padding:12px 20px;border-bottom:1px solid #e0e0d8;display:flex;justify-content:space-between;align-items:center}
+.topbar a{color:#555;text-decoration:none;font-size:14px}
+.topbar a:hover{color:#000}
+.lang-toggle{display:flex;gap:6px}
+.lang-btn{padding:5px 12px;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;font-size:13px;font-weight:600;transition:all .15s}
+.lang-btn.active{background:#2a2a2a;color:#fff;border-color:#2a2a2a}
+
+/* ======= SETUP SCREEN ======= */
+.setup-screen{max-width:680px;margin:0 auto;padding:32px 20px}
+.setup-screen h1{font-size:30px;font-weight:800;margin-bottom:6px}
+.tagline{color:#666;font-size:15px;margin-bottom:28px}
+.section-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#888;margin-bottom:10px}
+.player-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.player-row{display:flex;gap:8px;align-items:center}
+.player-row input{flex:1;padding:9px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;outline:none;transition:border-color .15s}
+.player-row input:focus{border-color:#555}
+.player-row .remove-p{background:none;border:none;color:#aaa;font-size:18px;cursor:pointer;padding:0 4px;line-height:1}
+.player-row .remove-p:hover{color:#c0392b}
+.add-player-btn{background:none;border:1.5px dashed #bbb;border-radius:8px;padding:9px;font-size:13px;color:#888;cursor:pointer;transition:all .15s;width:100%}
+.add-player-btn:hover{border-color:#888;color:#444}
+.start-btn{width:100%;padding:14px;background:#2a2a2a;color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;margin-top:20px;transition:background .15s}
+.start-btn:hover{background:#444}
+.start-btn:disabled{background:#aaa;cursor:not-allowed}
+
+/* ======= GAME SCREEN ======= */
+.game-screen{display:none;max-width:860px;margin:0 auto;padding:24px 20px}
+.game-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.game-header h2{font-size:22px;font-weight:800}
+.quit-btn{background:none;border:1px solid #ddd;border-radius:7px;padding:7px 14px;font-size:13px;cursor:pointer;color:#555}
+.quit-btn:hover{background:#f5f5f0}
+
+/* Player strip */
+.player-strip{display:flex;gap:8px;margin-bottom:20px;overflow-x:auto;padding-bottom:4px}
+.player-token{min-width:90px;padding:10px 12px;border-radius:10px;border:2px solid transparent;text-align:center;transition:all .2s;background:#fff;border-color:#e0e0d8}
+.player-token.active{border-color:#2a2a2a;background:#2a2a2a;color:#fff}
+.player-token .pname{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.player-token .ppos{font-size:12px;margin-top:2px;opacity:.7}
+.player-token .pdrinks{font-size:11px;margin-top:2px;opacity:.6}
+
+/* Board */
+.board-wrap{background:#fff;border:1px solid #e0e0d8;border-radius:14px;padding:16px;margin-bottom:20px}
+.board{display:flex;flex-wrap:wrap;gap:6px}
+.space{width:48px;height:48px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;text-align:center;line-height:1.2;padding:2px;transition:transform .2s;cursor:default;position:relative}
+.space.start{background:#e8f5e8;border:2px solid #4caf50;color:#2e7d32;font-size:11px}
+.space.finish{background:#fff3e0;border:2px solid #ff9800;color:#e65100}
+.space.sip1{background:#e3f2fd;border:1.5px solid #90caf9;color:#1565c0}
+.space.sip2{background:#fce4ec;border:1.5px solid #f48fb1;color:#880e4f}
+.space.sip3{background:#fff9c4;border:1.5px solid #fff176;color:#f57f17}
+.space.card{background:#f3e5f5;border:1.5px solid #ce93d8;color:#4a148c}
+.space.safe{background:#e8f5e8;border:1.5px solid #a5d6a7;color:#1b5e20}
+.space.dare{background:#fbe9e7;border:1.5px solid #ffab91;color:#bf360c}
+.space.vote{background:#e8eaf6;border:1.5px solid #9fa8da;color:#1a237e}
+.space.skip{background:#f5f5f0;border:1.5px solid #bdbdbd;color:#424242}
+.space .snum{position:absolute;top:2px;left:4px;font-size:9px;opacity:.5;font-weight:400}
+.player-markers{position:absolute;bottom:2px;right:2px;display:flex;gap:1px;flex-wrap:wrap;justify-content:flex-end}
+.pmark{width:10px;height:10px;border-radius:50%;border:1px solid rgba(0,0,0,.2)}
+
+/* Dice + action area */
+.action-area{background:#fff;border:1px solid #e0e0d8;border-radius:14px;padding:20px;margin-bottom:20px;text-align:center}
+.turn-label{font-size:13px;color:#888;margin-bottom:8px}
+.current-player{font-size:20px;font-weight:800;margin-bottom:16px}
+.dice-btn{width:80px;height:80px;background:#2a2a2a;color:#fff;border:none;border-radius:14px;font-size:36px;cursor:pointer;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;transition:transform .1s,background .15s}
+.dice-btn:hover{background:#444}
+.dice-btn:active{transform:scale(.93)}
+.dice-btn.rolled{animation:shake .3s ease}
+@keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-12deg)}75%{transform:rotate(12deg)}}
+.dice-result{font-size:28px;font-weight:800;min-height:36px;margin-bottom:12px}
+.action-msg{font-size:16px;min-height:24px;color:#333;font-weight:500}
+.action-msg .highlight{color:#c0392b;font-weight:700}
+.next-btn{padding:11px 28px;background:#2a2a2a;color:#fff;border:none;border-radius:9px;font-size:15px;font-weight:700;cursor:pointer;display:none;margin:12px auto 0}
+.next-btn:hover{background:#444}
+
+/* Card modal */
+.card-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center}
+.card-modal-bg.open{display:flex}
+.card-modal{background:#fff;border-radius:16px;padding:28px;max-width:380px;width:90%;text-align:center}
+.card-modal .card-category{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:4px 12px;border-radius:20px;display:inline-block;margin-bottom:14px}
+.cat-challenge{background:#fce4ec;color:#880e4f}
+.cat-vote{background:#e8eaf6;color:#1a237e}
+.cat-truth{background:#e3f2fd;color:#1565c0}
+.cat-rule{background:#f3e5f5;color:#4a148c}
+.cat-group{background:#fff3e0;color:#e65100}
+.card-modal .card-text{font-size:18px;font-weight:700;line-height:1.5;margin-bottom:20px;color:#1a1a1a}
+.card-modal .close-card{padding:11px 28px;background:#2a2a2a;color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer}
+.card-modal .close-card:hover{background:#444}
+
+/* Legend */
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:12px;color:#555}
+.legend-dot{width:12px;height:12px;border-radius:3px}
+
+/* Edit modal */
+.edit-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center}
+.edit-modal-bg.open{display:flex}
+.edit-modal{background:#fff;border-radius:16px;padding:24px;max-width:520px;width:95%;max-height:85vh;overflow-y:auto}
+.edit-modal h3{font-size:17px;font-weight:700;margin-bottom:16px}
+.edit-cards-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.edit-card-row{display:flex;gap:8px;align-items:center}
+.edit-card-row select{padding:6px 8px;border:1px solid #ccc;border-radius:6px;font-size:12px}
+.edit-card-row textarea{flex:1;padding:7px 10px;border:1px solid #ccc;border-radius:7px;font-size:13px;resize:vertical;min-height:38px;font-family:inherit}
+.edit-card-row .rm{background:none;border:none;color:#aaa;cursor:pointer;font-size:16px;padding:0 2px}
+.edit-modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}
+.btn-sm{padding:7px 16px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid #ccc;background:#fff;color:#333}
+.btn-sm.primary{background:#2a2a2a;color:#fff;border-color:#2a2a2a}
+.btn-sm.primary:hover{background:#444}
+.edit-open-btn{font-size:12px;color:#888;text-decoration:underline;cursor:pointer;background:none;border:none;margin-top:4px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="index.html">← Back to Realm Forge</a>
+  <div class="lang-toggle">
+    <button class="lang-btn active" id="btnHU" onclick="setLang('hu')">🇭🇺 Magyar</button>
+    <button class="lang-btn" id="btnEN" onclick="setLang('en')">🇬🇧 English</button>
+  </div>
+</div>
+
+<!-- SETUP -->
+<div class="setup-screen" id="setupScreen">
+  <h1 id="t-title">🍺 KortyKaland</h1>
+  <p class="tagline" id="t-tagline">Bulis társasjáték — dobjál, lépj, igyál!</p>
+
+  <p class="section-title" id="t-players-label">JÁTÉKOSOK</p>
+  <div class="player-list" id="playerList"></div>
+  <button class="add-player-btn" id="addPlayerBtn" onclick="addPlayer()">+ Játékos hozzáadása</button>
+
+  <button class="start-btn" id="startBtn" onclick="startGame()" disabled id="startBtn">🎲 Játék indítása</button>
+  <button class="edit-open-btn" id="editOpenBtn" onclick="openEditModal()">✎ Kártyák szerkesztése</button>
+</div>
+
+<!-- GAME -->
+<div class="game-screen" id="gameScreen">
+  <div class="game-header">
+    <h2 id="t-game-title">🍺 KortyKaland</h2>
+    <button class="quit-btn" onclick="quitGame()" id="t-quit">← Kilépés</button>
+  </div>
+  <div class="player-strip" id="playerStrip"></div>
+  <div class="board-wrap">
+    <div class="board" id="board"></div>
+    <div class="legend" id="legend"></div>
+  </div>
+  <div class="action-area">
+    <p class="turn-label" id="t-turn-label">Következő dobás:</p>
+    <p class="current-player" id="currentPlayerName">—</p>
+    <div class="dice-btn" id="diceBtn" onclick="rollDice()">🎲</div>
+    <p class="dice-result" id="diceResult"></p>
+    <p class="action-msg" id="actionMsg"></p>
+    <button class="next-btn" id="nextBtn" onclick="nextTurn()"></button>
+  </div>
+</div>
+
+<!-- CARD MODAL -->
+<div class="card-modal-bg" id="cardModalBg">
+  <div class="card-modal">
+    <div class="card-category" id="cardCategory"></div>
+    <p class="card-text" id="cardText"></p>
+    <button class="close-card" onclick="closeCard()" id="t-got-it">Megértettem!</button>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="edit-modal-bg" id="editModalBg">
+  <div class="edit-modal">
+    <h3 id="t-edit-title">Kártyák szerkesztése</h3>
+    <div class="edit-cards-list" id="editCardsList"></div>
+    <button class="btn-sm" onclick="addEditCard()">+ Kártya</button>
+    <div class="edit-modal-btns">
+      <button class="btn-sm" onclick="closeEditModal()" id="t-cancel">Mégse</button>
+      <button class="btn-sm primary" onclick="saveCards()" id="t-save">Mentés</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  TRANSLATIONS
+// ============================================================
+const T = {
+  hu: {
+    title:'🍺 KortyKaland',
+    tagline:'Bulis társasjáték — dobjál, lépj, igyál!',
+    playersLabel:'JÁTÉKOSOK',
+    playerPlaceholder:'Játékos neve',
+    addPlayer:'+ Játékos hozzáadása',
+    startBtn:'🎲 Játék indítása',
+    editOpenBtn:'✎ Kártyák szerkesztése',
+    gameTitle:'🍺 KortyKaland',
+    quit:'← Kilépés',
+    turnLabel:'Következő dobás:',
+    nextTurn:'Következő játékos →',
+    gotIt:'Megértettem!',
+    editTitle:'Kártyák szerkesztése',
+    cancel:'Mégse',
+    save:'Mentés',
+    pos:'Mező',
+    drinks:'korty',
+    start:'START',
+    finish:'CSOPORT: MINDENKI ISZIK!',
+    sip1:'1 korty',
+    sip2:'2 korty',
+    sip3:'3 korty',
+    card:'Húzz lapot!',
+    safe:'Mentes mező',
+    dare:'MERJ!',
+    vote:'SZAVAZÁS',
+    skip:'Kimaradsz',
+    rolled:'Dobás:',
+    moveTo:'lép a',
+    mezore:'mezőre.',
+    actionSip:kn=>`<span class="highlight">${kn} iszik!</span>`,
+    actionSips:(kn,n)=>`<span class="highlight">${kn} ${n} kortyot iszik!</span>`,
+    actionDraw:kn=>`${kn} húz egy kártyát...`,
+    actionSafe:kn=>`${kn} mentes mezőn — nem kell inni! 🛡️`,
+    actionSkip:kn=>`${kn} kimarad ebből a körből.`,
+    actionWin:kn=>`🏆 ${kn} megnyerte a játékot! Mindenki iszik egy utolsót!`,
+    cats:{challenge:'Kihívás',vote:'Szavazás',truth:'Igaz vagy hazug?',rule:'Szabály',group:'Csoportos'},
+  },
+  en: {
+    title:'🍺 SipQuest',
+    tagline:'Party board game — roll, move, drink!',
+    playersLabel:'PLAYERS',
+    playerPlaceholder:"Player's name",
+    addPlayer:'+ Add player',
+    startBtn:'🎲 Start game',
+    editOpenBtn:'✎ Edit cards',
+    gameTitle:'🍺 SipQuest',
+    quit:'← Quit',
+    turnLabel:"Next roll:",
+    nextTurn:'Next player →',
+    gotIt:'Got it!',
+    editTitle:'Edit cards',
+    cancel:'Cancel',
+    save:'Save',
+    pos:'Space',
+    drinks:'sips',
+    start:'START',
+    finish:'GROUP: EVERYONE DRINKS!',
+    sip1:'1 sip',
+    sip2:'2 sips',
+    sip3:'3 sips',
+    card:'Draw a card!',
+    safe:'Safe space',
+    dare:'DARE!',
+    vote:'VOTE',
+    skip:'Skip turn',
+    rolled:'Rolled:',
+    moveTo:'moves to space',
+    mezore:'.',
+    actionSip:kn=>`<span class="highlight">${kn} drinks!</span>`,
+    actionSips:(kn,n)=>`<span class="highlight">${kn} drinks ${n} sips!</span>`,
+    actionDraw:kn=>`${kn} draws a card...`,
+    actionSafe:kn=>`${kn} landed on a safe space! 🛡️`,
+    actionSkip:kn=>`${kn} skips this turn.`,
+    actionWin:kn=>`🏆 ${kn} wins! Everyone drinks one last time!`,
+    cats:{challenge:'Challenge',vote:'Vote',truth:'Truth or Lie?',rule:'Rule',group:'Group'},
+  }
+};
+
+let lang = 'hu';
+function setLang(l){
+  lang=l;
+  document.getElementById('btnHU').className='lang-btn'+(l==='hu'?' active':'');
+  document.getElementById('btnEN').className='lang-btn'+(l==='en'?' active':'');
+  applyTranslations();
+}
+
+function applyTranslations(){
+  const t=T[lang];
+  document.getElementById('t-title').textContent=t.title;
+  document.getElementById('t-tagline').textContent=t.tagline;
+  document.getElementById('t-players-label').textContent=t.playersLabel;
+  document.getElementById('addPlayerBtn').textContent=t.addPlayer;
+  document.getElementById('startBtn').textContent=t.startBtn;
+  document.getElementById('editOpenBtn').textContent=t.editOpenBtn;
+  document.getElementById('t-game-title').textContent=t.gameTitle;
+  document.getElementById('t-quit').textContent=t.quit;
+  document.getElementById('t-turn-label').textContent=t.turnLabel;
+  document.getElementById('t-got-it').textContent=t.gotIt;
+  document.getElementById('t-edit-title').textContent=t.editTitle;
+  document.getElementById('t-cancel').textContent=t.cancel;
+  document.getElementById('t-save').textContent=t.save;
+  document.getElementById('nextBtn').textContent=t.nextTurn;
+  document.querySelectorAll('.player-row input').forEach(inp=>{
+    inp.placeholder=t.playerPlaceholder;
+  });
+  if(boardSpaces.length) renderLegend();
+}
+
+// ============================================================
+//  DEFAULT CARDS (bilingual)
+// ============================================================
+const defaultCards = {
+  hu: [
+    {cat:'challenge', text:'Fejezd be a mondatot: "Ha részeg lennék, akkor..."'},
+    {cat:'challenge', text:'Utánozd a bal oldalad ülő embert 30 másodpercig!'},
+    {cat:'challenge', text:'Mondd el a legjobb viccet. Ha senki nem nevet, iszol egyet.'},
+    {cat:'challenge', text:'Táncolj 15 másodpercig zene nélkül. Ha leállsz, 2 korty.'},
+    {cat:'challenge', text:'Mondd el a telefonod utolsó hívottját. Ha szégyelld, 1 korty.'},
+    {cat:'vote',      text:'Szavazzatok: ki innánk a legtöbbet ezen a bulin? Az illető iszik 3-at!'},
+    {cat:'vote',      text:'Szavazzatok: ki a legjobb táncos? A vesztes iszik.'},
+    {cat:'vote',      text:'Szavazzatok: kinek a legjobb az ivós technikája? Mutassa meg!'},
+    {cat:'truth',     text:'Igaz vagy hazug? "Soha nem csaptam be egy barátom." — Ha hazug, iszol.'},
+    {cat:'truth',     text:'Igaz vagy hazug? "Imádom a hétfőket." — Mindenki dönt, a vesztes iszik.'},
+    {cat:'truth',     text:'Mondd el, hogy mi volt a legutolsó hazugságod. Ha nem mondod el, 2 korty.'},
+    {cat:'rule',      text:'Mostantól minden kör elején mindenki köszön. Aki elfelejti, iszik.'},
+    {cat:'rule',      text:'Új szabály: a "nem" szó tilos. Aki kimondja, iszik.'},
+    {cat:'rule',      text:'A következő 3 körben mindenki csak suttoghat. Aki hangosabb, iszik.'},
+    {cat:'group',     text:'Mindenki, akinek barna a haja, iszik egyet!'},
+    {cat:'group',     text:'Mindenki, aki ma evett pizzát, iszik kettőt!'},
+    {cat:'group',     text:'Mindenki, akinek van kisállata, iszik egyet!'},
+    {cat:'group',     text:'Mindenki, aki ma mosolyogott valakin, csinkózik a szomszédjával!'},
+    {cat:'challenge', text:'Mondd el 3 dologgal, ami tetszik a jobbod ülő emberben. Ha nem tudsz 3-at, iszol.'},
+    {cat:'challenge', text:'Csináld le az aktuális trendtáncot! Ha nem tudod, 2 korty.'},
+  ],
+  en: [
+    {cat:'challenge', text:'Finish the sentence: "When I\'m drunk I always..."'},
+    {cat:'challenge', text:'Imitate the person to your left for 30 seconds!'},
+    {cat:'challenge', text:'Tell your best joke. If nobody laughs, take a sip.'},
+    {cat:'challenge', text:'Dance for 15 seconds without music. If you stop, 2 sips.'},
+    {cat:'challenge', text:'Reveal the last person you called. If it\'s embarrassing, 1 sip.'},
+    {cat:'vote',      text:'Vote: who would drink the most tonight? That person drinks 3!'},
+    {cat:'vote',      text:'Vote: who is the best dancer? The loser drinks.'},
+    {cat:'vote',      text:'Vote: who has the best drinking technique? Let them show it!'},
+    {cat:'truth',     text:'True or lie? "I have never lied to a friend." — If false, you drink.'},
+    {cat:'truth',     text:'True or lie? "I love Mondays." — Everyone votes, the loser drinks.'},
+    {cat:'truth',     text:'Share your most recent lie. If you won\'t, take 2 sips.'},
+    {cat:'rule',      text:'New rule: everyone must greet at the start of each turn. Forgetting = drink.'},
+    {cat:'rule',      text:'New rule: the word "no" is banned. Anyone who says it drinks.'},
+    {cat:'rule',      text:'For the next 3 turns everyone must whisper. Too loud = drink.'},
+    {cat:'group',     text:'Everyone with brown hair takes a sip!'},
+    {cat:'group',     text:'Everyone who ate pizza today drinks twice!'},
+    {cat:'group',     text:'Everyone who has a pet takes a sip!'},
+    {cat:'group',     text:'Everyone who smiled at a stranger today clinks with their neighbor!'},
+    {cat:'challenge', text:'Say 3 nice things about the person to your right. Can\'t? You drink.'},
+    {cat:'challenge', text:'Do the current trend dance! If you don\'t know it, 2 sips.'},
+  ]
+};
+
+// User-editable cards (deep clone)
+let cards = {
+  hu: defaultCards.hu.map(c=>({...c})),
+  en: defaultCards.en.map(c=>({...c}))
+};
+
+// ============================================================
+//  BOARD DEFINITION  (36 spaces)
+// ============================================================
+const BOARD_PATTERN = [
+  'start','sip1','sip1','card','sip2','safe',
+  'dare', 'sip1','sip1','vote','sip2','sip1',
+  'card', 'sip3','safe','sip1','sip1','dare',
+  'sip2', 'card','sip1','vote','sip1','sip2',
+  'safe', 'dare','sip1','sip1','card','sip2',
+  'sip1', 'vote','sip1','safe','sip3','finish'
+];
+
+const COLORS = {
+  start:'start',finish:'finish',sip1:'sip1',sip2:'sip2',sip3:'sip3',
+  card:'card',safe:'safe',dare:'dare',vote:'vote',skip:'skip'
+};
+
+let boardSpaces = BOARD_PATTERN;
+
+// ============================================================
+//  PLAYER SETUP
+// ============================================================
+const PLAYER_COLORS = ['#e74c3c','#3498db','#2ecc71','#f39c12','#9b59b6','#1abc9c','#e67e22','#e91e63'];
+let players = [];
+let currentPlayer = 0;
+let gameStarted = false;
+let skipNextTurn = {}; // playerIdx -> bool
+
+function init(){
+  addPlayer(); addPlayer(); addPlayer();
+  renderLegend();
+}
+
+function addPlayer(){
+  if(players.length >= 8) return;
+  const idx = players.length;
+  players.push({name:'', pos:0, drinks:0, color:PLAYER_COLORS[idx]});
+  renderPlayerSetup();
+}
+
+function renderPlayerSetup(){
+  const list = document.getElementById('playerList');
+  list.innerHTML='';
+  players.forEach((p,i)=>{
+    const row = document.createElement('div');
+    row.className='player-row';
+    row.innerHTML=`
+      <div style="width:16px;height:16px;border-radius:50%;background:${p.color};flex-shrink:0"></div>
+      <input type="text" placeholder="${T[lang].playerPlaceholder}" value="${p.name}"
+        oninput="players[${i}].name=this.value;updateStartBtn()">
+      ${players.length>2?`<button class="remove-p" onclick="removePlayer(${i})">×</button>`:''}
+    `;
+    list.appendChild(row);
+  });
+  updateStartBtn();
+}
+
+function removePlayer(i){
+  players.splice(i,1);
+  players.forEach((p,j)=>p.color=PLAYER_COLORS[j]);
+  renderPlayerSetup();
+}
+
+function updateStartBtn(){
+  const filled = players.filter(p=>p.name.trim()).length;
+  document.getElementById('startBtn').disabled = filled < 2;
+}
+
+// ============================================================
+//  GAME LOGIC
+// ============================================================
+function startGame(){
+  players.forEach(p=>{p.pos=0;p.drinks=0});
+  skipNextTurn={};
+  currentPlayer=0;
+  gameStarted=true;
+  document.getElementById('setupScreen').style.display='none';
+  document.getElementById('gameScreen').style.display='block';
+  buildBoard();
+  renderPlayerStrip();
+  setActionArea();
+}
+
+function quitGame(){
+  gameStarted=false;
+  document.getElementById('gameScreen').style.display='none';
+  document.getElementById('setupScreen').style.display='block';
+  document.getElementById('actionMsg').innerHTML='';
+  document.getElementById('diceResult').textContent='';
+  document.getElementById('nextBtn').style.display='none';
+  document.getElementById('diceBtn').style.display='flex';
+}
+
+function buildBoard(){
+  const board = document.getElementById('board');
+  board.innerHTML='';
+  boardSpaces.forEach((type,i)=>{
+    const sp = document.createElement('div');
+    sp.className=`space ${type}`;
+    sp.id=`space-${i}`;
+    const lbl = getSpaceLabel(type,i);
+    sp.innerHTML=`<span class="snum">${i}</span>${lbl}<div class="player-markers" id="markers-${i}"></div>`;
+    board.appendChild(sp);
+  });
+  updateMarkers();
+}
+
+function getSpaceLabel(type,i){
+  const t=T[lang];
+  const map={start:t.start,finish:t.finish,sip1:t.sip1,sip2:t.sip2,sip3:t.sip3,
+             card:t.card,safe:t.safe,dare:t.dare,vote:t.vote,skip:t.skip};
+  return map[type]||type;
+}
+
+function updateMarkers(){
+  document.querySelectorAll('.player-markers').forEach(m=>m.innerHTML='');
+  players.forEach((p,i)=>{
+    const markers = document.getElementById(`markers-${p.pos}`);
+    if(markers){
+      const dot=document.createElement('div');
+      dot.className='pmark';
+      dot.style.background=p.color;
+      dot.title=p.name;
+      markers.appendChild(dot);
+    }
+  });
+}
+
+function renderPlayerStrip(){
+  const strip=document.getElementById('playerStrip');
+  strip.innerHTML='';
+  players.forEach((p,i)=>{
+    const tok=document.createElement('div');
+    tok.className='player-token'+(i===currentPlayer?' active':'');
+    tok.style.borderColor=i===currentPlayer?p.color:'#e0e0d8';
+    tok.style.background=i===currentPlayer?p.color:'#fff';
+    tok.innerHTML=`
+      <div class="pname">${p.name}</div>
+      <div class="ppos">${T[lang].pos}: ${p.pos}</div>
+      <div class="pdrinks">${p.drinks} ${T[lang].drinks}</div>
+    `;
+    strip.appendChild(tok);
+  });
+}
+
+function setActionArea(){
+  const p=players[currentPlayer];
+  document.getElementById('currentPlayerName').textContent=p.name;
+  document.getElementById('currentPlayerName').style.color=p.color;
+  document.getElementById('diceResult').textContent='';
+  document.getElementById('actionMsg').innerHTML='';
+  document.getElementById('nextBtn').style.display='none';
+  document.getElementById('diceBtn').style.display='flex';
+}
+
+function rollDice(){
+  const btn=document.getElementById('diceBtn');
+  btn.classList.add('rolled');
+  setTimeout(()=>btn.classList.remove('rolled'),350);
+
+  const roll=Math.floor(Math.random()*6)+1;
+  const faces=['⚀','⚁','⚂','⚃','⚄','⚅'];
+  document.getElementById('diceResult').textContent=faces[roll-1]+' '+roll;
+  btn.style.display='none';
+
+  const p=players[currentPlayer];
+  if(skipNextTurn[currentPlayer]){
+    skipNextTurn[currentPlayer]=false;
+    document.getElementById('actionMsg').innerHTML=T[lang].actionSkip(p.name);
+    document.getElementById('nextBtn').style.display='block';
+    return;
+  }
+
+  const maxPos=boardSpaces.length-1;
+  const newPos=Math.min(p.pos+roll,maxPos);
+  p.pos=newPos;
+  updateMarkers();
+  renderPlayerStrip();
+
+  const type=boardSpaces[newPos];
+  handleSpace(type,p,newPos===maxPos);
+}
+
+function handleSpace(type,p,isFinish){
+  const t=T[lang];
+  const msg=document.getElementById('actionMsg');
+  const next=document.getElementById('nextBtn');
+
+  if(isFinish){
+    msg.innerHTML=t.actionWin(p.name);
+    p.drinks+=1;
+    players.filter((_,i)=>i!==currentPlayer).forEach(op=>op.drinks++);
+    next.textContent=t.nextTurn;
+    next.style.display='block';
+    renderPlayerStrip();
+    return;
+  }
+
+  switch(type){
+    case 'sip1':
+      p.drinks+=1;
+      msg.innerHTML=t.actionSip(p.name);
+      break;
+    case 'sip2':
+      p.drinks+=2;
+      msg.innerHTML=t.actionSips(p.name,2);
+      break;
+    case 'sip3':
+      p.drinks+=3;
+      msg.innerHTML=t.actionSips(p.name,3);
+      break;
+    case 'safe':
+      msg.innerHTML=t.actionSafe(p.name);
+      break;
+    case 'skip':
+      skipNextTurn[currentPlayer]=true;
+      msg.innerHTML=t.actionSkip(p.name);
+      break;
+    case 'card':
+    case 'dare':
+    case 'vote':
+      msg.innerHTML=t.actionDraw(p.name);
+      setTimeout(()=>drawCard(type),600);
+      next.textContent=t.nextTurn;
+      next.style.display='block';
+      renderPlayerStrip();
+      return;
+    default:
+      msg.innerHTML='';
+  }
+  renderPlayerStrip();
+  next.textContent=t.nextTurn;
+  next.style.display='block';
+}
+
+function drawCard(spaceType){
+  const pool=cards[lang];
+  let filtered=pool;
+  if(spaceType==='dare') filtered=pool.filter(c=>c.cat==='challenge'||c.cat==='dare');
+  else if(spaceType==='vote') filtered=pool.filter(c=>c.cat==='vote'||c.cat==='group');
+  if(!filtered.length) filtered=pool;
+  const card=filtered[Math.floor(Math.random()*filtered.length)];
+  showCardModal(card);
+}
+
+function showCardModal(card){
+  const cats=T[lang].cats;
+  const catKey=card.cat;
+  const catLabel=cats[catKey]||catKey;
+  const catClass='cat-'+catKey;
+  document.getElementById('cardCategory').textContent=catLabel;
+  document.getElementById('cardCategory').className='card-category '+catClass;
+  document.getElementById('cardText').textContent=card.text;
+  document.getElementById('t-got-it').textContent=T[lang].gotIt;
+  document.getElementById('cardModalBg').classList.add('open');
+}
+
+function closeCard(){
+  document.getElementById('cardModalBg').classList.remove('open');
+}
+
+function nextTurn(){
+  currentPlayer=(currentPlayer+1)%players.length;
+  renderPlayerStrip();
+  setActionArea();
+  buildBoard();
+}
+
+// ============================================================
+//  LEGEND
+// ============================================================
+function renderLegend(){
+  const t=T[lang];
+  const items=[
+    {type:'sip1',color:'#e3f2fd',label:t.sip1},
+    {type:'sip2',color:'#fce4ec',label:t.sip2},
+    {type:'sip3',color:'#fff9c4',label:t.sip3},
+    {type:'card',color:'#f3e5f5',label:t.card},
+    {type:'safe',color:'#e8f5e8',label:t.safe},
+    {type:'dare',color:'#fbe9e7',label:t.dare},
+    {type:'vote',color:'#e8eaf6',label:t.vote},
+  ];
+  const legend=document.getElementById('legend');
+  if(!legend) return;
+  legend.innerHTML=items.map(it=>`
+    <div class="legend-item">
+      <div class="legend-dot" style="background:${it.color};border:1px solid rgba(0,0,0,.12)"></div>
+      <span>${it.label}</span>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+//  CARD EDITOR
+// ============================================================
+function openEditModal(){
+  renderEditCards();
+  document.getElementById('editModalBg').classList.add('open');
+}
+function closeEditModal(){
+  document.getElementById('editModalBg').classList.remove('open');
+}
+
+function renderEditCards(){
+  const list=document.getElementById('editCardsList');
+  const t=T[lang];
+  list.innerHTML='';
+  cards[lang].forEach((c,i)=>{
+    const row=document.createElement('div');
+    row.className='edit-card-row';
+    const catOptions=Object.entries(t.cats).map(([k,v])=>
+      `<option value="${k}"${c.cat===k?' selected':''}>${v}</option>`).join('');
+    row.innerHTML=`
+      <select onchange="cards['${lang}'][${i}].cat=this.value">${catOptions}</select>
+      <textarea oninput="cards['${lang}'][${i}].text=this.value">${c.text}</textarea>
+      <button class="rm" onclick="removeCard(${i})">×</button>
+    `;
+    list.appendChild(row);
+  });
+}
+
+function addEditCard(){
+  cards[lang].push({cat:'challenge',text:''});
+  renderEditCards();
+}
+function removeCard(i){
+  cards[lang].splice(i,1);
+  renderEditCards();
+}
+function saveCards(){
+  closeEditModal();
+}
+
+// ============================================================
+//  INIT
+// ============================================================
+init();
+applyTranslations();
+</script>
+</body>
+</html>
