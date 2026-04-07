@@ -3,415 +3,599 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Spottix — Realm Forge</title>
+<title>🎯 Spottix — Realm Forge</title>
 <style>
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:Arial,sans-serif; background:#f0f2f5; padding:20px; }
-.panel { background:white; border-radius:10px; padding:24px; max-width:820px; margin:0 auto 20px; box-shadow:0 2px 8px rgba(0,0,0,.1); }
-.back { display:inline-block; margin-bottom:14px; color:#5a3ecb; font-weight:bold; text-decoration:none; font-size:14px; }
-h1 { color:#2c2c54; margin-bottom:3px; }
-.sub { color:#999; font-size:.9em; font-style:italic; margin-bottom:18px; }
-.how { background:#f5f3ff; border-left:4px solid #5a3ecb; padding:13px 15px; border-radius:0 8px 8px 0; margin-bottom:18px; font-size:13.5px; color:#444; line-height:1.6; }
-label.lbl { font-weight:bold; display:block; margin-bottom:5px; color:#444; font-size:14px; }
-input[type=file] { width:100%; padding:9px; border:2px dashed #aaa; border-radius:8px; margin-bottom:10px; cursor:pointer; }
-.thumbs { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:8px; }
-.thumb { width:54px; height:54px; border-radius:6px; object-fit:cover; border:2px solid #ddd; }
-.count { font-size:13px; color:#666; margin-bottom:14px; }
-.count b { color:#5a3ecb; }
-.row { display:flex; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
-.row label { font-size:13px; color:#555; }
-select { padding:7px 11px; border:1px solid #ccc; border-radius:7px; font-size:14px; }
-.btns { display:flex; gap:10px; flex-wrap:wrap; margin-top:6px; }
-button { padding:11px 22px; border:none; border-radius:8px; font-size:14px; font-weight:bold; cursor:pointer; transition:opacity .15s; }
-button:hover { opacity:.88; }
-.btn-gen  { background:#5a3ecb; color:white; }
-.btn-pdf  { background:#e67e22; color:white; display:none; }
-.btn-print{ background:#27ae60; color:white; display:none; }
-.btn-clr  { background:#e74c3c; color:white; }
-.err { background:#ffe0e0; color:#c0392b; padding:10px 13px; border-radius:8px; margin-top:10px; display:none; font-size:13px; }
-.info { background:#fff8e1; color:#7d5a00; padding:10px 13px; border-radius:8px; margin-top:10px; font-size:13px; display:none; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,sans-serif;background:#f5f5f0;color:#1a1a1a;min-height:100vh}
+  .topbar{padding:12px 20px;border-bottom:1px solid #e0e0d8}
+  .topbar a{color:#555;text-decoration:none;font-size:14px}
+  .topbar a:hover{color:#000}
+  .container{max-width:900px;margin:0 auto;padding:24px 20px}
+  h1{font-size:28px;font-weight:700;margin-bottom:4px}
+  .subtitle{color:#666;margin-bottom:8px;font-size:15px}
+  .howto{background:#fff;border:1px solid #e0e0d8;border-radius:10px;padding:14px 18px;margin-bottom:24px;font-size:14px;color:#444;line-height:1.6}
+  .howto strong{color:#1a1a1a}
 
-/* Preview canvas grid */
-#preview { display:none; margin-top:16px; }
-#preview h3 { font-size:14px; color:#444; margin-bottom:10px; }
-.canvas-grid { display:flex; flex-wrap:wrap; gap:10px; }
-canvas.card-canvas {
-  border-radius:50%;
-  border:3px solid #2c2c54;
-  display:block;
-  /* size set by JS */
-}
+  /* Upload area */
+  .upload-area{border:2px dashed #ccc;border-radius:12px;padding:28px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;background:#fff;margin-bottom:20px}
+  .upload-area:hover{border-color:#888;background:#fafaf8}
+  .upload-area input{display:none}
+  .upload-area .icon{font-size:32px;margin-bottom:8px}
+  .upload-area p{color:#666;font-size:14px}
+  .counter{font-size:15px;font-weight:600;margin-bottom:16px;color:#333}
+  .counter span{color:#2a7a2a}
 
-@media print {
-  .panel { display:none !important; }
-  #preview { display:block !important; }
-  #preview h3 { display:none; }
-  .canvas-grid {
-    display:grid !important;
-    grid-template-columns: repeat(3, 1fr) !important;
-    gap:6mm !important;
-    padding:6mm !important;
-    width:210mm;
-    box-sizing:border-box;
-  }
-  canvas.card-canvas {
-    width:100% !important;
-    height:auto !important;
-    page-break-inside:avoid;
-    break-inside:avoid;
-  }
-}
+  /* Thumbnail grid */
+  .thumb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;margin-bottom:24px}
+  .thumb-cell{position:relative;width:100%;aspect-ratio:1;border-radius:8px;overflow:hidden;border:2px solid #e0e0d8;cursor:pointer;background:#f0f0ea;transition:border-color .2s}
+  .thumb-cell:hover{border-color:#888}
+  .thumb-cell canvas{width:100%;height:100%;display:block}
+  .thumb-cell .edit-btn{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.55);color:#fff;font-size:11px;text-align:center;padding:3px 0;opacity:0;transition:opacity .2s}
+  .thumb-cell:hover .edit-btn{opacity:1}
+  .thumb-cell .remove-btn{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;font-size:10px;line-height:18px;text-align:center}
+  .slot-empty{border:2px dashed #ddd;border-radius:8px;background:#fafaf8;display:flex;align-items:center;justify-content:center;color:#bbb;font-size:11px;cursor:default}
+
+  /* Controls */
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:20px}
+  .controls label{font-size:13px;color:#555}
+  .controls select{padding:6px 10px;border:1px solid #ccc;border-radius:6px;font-size:13px}
+  .btn{padding:9px 20px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:background .15s,opacity .15s}
+  .btn-primary{background:#2a2a2a;color:#fff}
+  .btn-primary:hover{background:#444}
+  .btn-primary:disabled{background:#aaa;cursor:not-allowed}
+  .btn-secondary{background:#fff;color:#333;border:1px solid #ccc}
+  .btn-secondary:hover{background:#f5f5f0}
+  .btn-danger{background:#fff;color:#c0392b;border:1px solid #e0b0ac}
+  .btn-danger:hover{background:#fdf5f5}
+
+  /* Preview */
+  #preview{display:flex;flex-wrap:wrap;gap:12px;margin-top:24px}
+  .card-preview-wrap{display:flex;flex-direction:column;align-items:center;gap:4px}
+  .card-preview-wrap span{font-size:11px;color:#999}
+
+  /* ======= IMAGE EDITOR MODAL ======= */
+  .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:1000;align-items:center;justify-content:center}
+  .modal-bg.open{display:flex}
+  .modal{background:#fff;border-radius:14px;padding:24px;width:440px;max-width:95vw}
+  .modal h2{font-size:17px;font-weight:700;margin-bottom:16px}
+  .editor-area{position:relative;width:340px;height:340px;margin:0 auto 16px;border-radius:50%;overflow:hidden;border:3px solid #2a2a2a;cursor:grab;background:#f0f0ea;user-select:none}
+  .editor-area.grabbing{cursor:grabbing}
+  .editor-img{position:absolute;transform-origin:center center;pointer-events:none}
+  .editor-controls{display:flex;align-items:center;gap:10px;margin-bottom:16px;justify-content:center}
+  .editor-controls label{font-size:13px;color:#555;min-width:50px}
+  .editor-controls input[type=range]{flex:1;max-width:180px}
+  .editor-controls span{font-size:13px;font-weight:600;min-width:36px;text-align:right}
+  .modal-buttons{display:flex;gap:10px;justify-content:flex-end}
+  .hint{font-size:12px;color:#888;text-align:center;margin-bottom:14px}
 </style>
 </head>
 <body>
 
-<div class="panel">
-  <a class="back" href="index.html">← Back to Realm Forge</a>
+<div class="topbar"><a href="index.html">← Back to Realm Forge</a></div>
+
+<div class="container">
   <h1>🎯 Spottix</h1>
-  <p class="sub">The symbol matching card game</p>
+  <p class="subtitle">The symbol matching card game</p>
 
-  <div class="how">
-    <strong>How it works:</strong> Upload 31 photos. Spottix places 6 symbols on each of the 31 cards at different sizes and angles — just like real Dobble. Every pair of cards shares exactly one matching symbol. Download as PDF or print directly!
+  <div class="howto">
+    <strong>How it works:</strong> Upload 31 photos. Click any thumbnail to crop &amp; position it exactly how you want — drag and zoom inside the circle. Then generate 31 cards where every pair shares exactly one matching symbol, just like Dobble.
   </div>
 
-  <label class="lbl">Upload your 31 images:</label>
-  <input type="file" id="img-input" multiple accept="image/*">
-  <div class="thumbs" id="thumbs"></div>
-  <div class="count">Loaded: <b id="img-count">0</b> / 31</div>
-
-  <div class="row">
-    <label>Preview size:</label>
-    <select id="prev-size">
-      <option value="140">Small (fits more on screen)</option>
-      <option value="190" selected>Medium</option>
-      <option value="240">Large</option>
-    </select>
+  <div class="upload-area" id="uploadArea">
+    <input type="file" id="fileInput" accept="image/*" multiple>
+    <div class="icon">📁</div>
+    <p><strong>Click to upload images</strong> — or drag &amp; drop here</p>
+    <p>You need 31 images total. You can upload in batches.</p>
   </div>
 
-  <div class="btns">
-    <button class="btn-gen" onclick="generate()">🎯 Generate Cards</button>
-    <button class="btn-pdf" id="btn-pdf" onclick="downloadPDF()">⬇️ Download PDF</button>
-    <button class="btn-print" id="btn-print" onclick="window.print()">🖨️ Print</button>
-    <button class="btn-clr" onclick="clearAll()">Clear</button>
+  <p class="counter">Loaded: <span id="countDisplay">0</span> / 31</p>
+
+  <div class="thumb-grid" id="thumbGrid"></div>
+
+  <div class="controls">
+    <label>Preview size:
+      <select id="sizeSelect">
+        <option value="160">Small</option>
+        <option value="220" selected>Medium</option>
+        <option value="300">Large</option>
+      </select>
+    </label>
+    <button class="btn btn-primary" id="generateBtn" disabled>🎯 Generate Cards</button>
+    <button class="btn btn-secondary" id="downloadBtn" disabled>⬇️ Download PDF</button>
+    <button class="btn btn-secondary" id="printBtn" disabled>🖨️ Print</button>
+    <button class="btn btn-danger" id="clearBtn">Clear</button>
   </div>
-  <div class="err" id="err"></div>
-  <div class="info" id="info"></div>
+
+  <div id="preview"></div>
 </div>
 
-<div id="preview">
-  <div class="panel" style="padding:16px;">
-    <h3>Preview — <span id="preview-label"></span></h3>
-    <div class="canvas-grid" id="canvas-grid"></div>
+<!-- IMAGE EDITOR MODAL -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h2>Edit image crop</h2>
+    <div class="editor-area" id="editorArea">
+      <img class="editor-img" id="editorImg" draggable="false">
+    </div>
+    <p class="hint">Drag to reposition · Use the slider to zoom</p>
+    <div class="editor-controls">
+      <label>Zoom</label>
+      <input type="range" id="zoomSlider" min="50" max="300" value="100" step="1">
+      <span id="zoomVal">100%</span>
+    </div>
+    <div class="modal-buttons">
+      <button class="btn btn-secondary" id="cancelEdit">Cancel</button>
+      <button class="btn btn-primary" id="confirmEdit">✓ Confirm</button>
+    </div>
   </div>
 </div>
 
-<!-- jsPDF for PDF generation -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
 <script>
-let images = [];       // full-res data URLs
-let imgObjs = [];      // Image() objects (preloaded)
-let loadedCount = 0;
-let generated = false;
-let cardSets = [];
-const CARD_RENDER_SIZE = 600; // internal canvas resolution (sharp!)
+// ============================================================
+//  STATE
+// ============================================================
+const MAX = 31;
+const SYMBOLS_PER_CARD = 6;
+// Projective plane order 5 → 31 cards, 6 symbols each
+// Standard construction
+function buildDobbleDeck() {
+  const n = 5; // order
+  const cards = [];
+  // card 0
+  cards.push([0,1,2,3,4,5]);
+  // n+1 "infinity" cards
+  for(let i=0;i<n+1;i++){
+    const c=[31+i]; // symbol index placeholder — we'll remap below
+    // build using standard finite projective plane PG(2,5)
+  }
+  // Use known valid (7-card n=2 or 31-card n=5) construction
+  return buildPG2_5();
+}
 
-/* ── Load images at full quality ── */
-document.getElementById('img-input').addEventListener('change', function(e) {
-  images = []; imgObjs = []; loadedCount = 0;
-  document.getElementById('thumbs').innerHTML = '';
-  document.getElementById('img-count').textContent = '0';
-  const files = Array.from(e.target.files);
-  files.forEach((file, i) => {
-    const reader = new FileReader();
-    reader.onload = ev => {
-      images[i] = ev.target.result;
-      // Preload as Image object
-      const img = new Image();
-      img.src = ev.target.result;
-      imgObjs[i] = img;
-      loadedCount++;
-      document.getElementById('img-count').textContent = loadedCount;
-      // Thumbnail
-      const th = document.createElement('img');
-      th.className = 'thumb'; th.src = ev.target.result;
-      document.getElementById('thumbs').appendChild(th);
+function buildPG2_5(){
+  // Projective plane of order 5: 31 points, 31 lines, each line has 6 points
+  const n=5;
+  const cards=[];
+  // Line at infinity
+  const inf=[];for(let i=0;i<n+1;i++)inf.push(i);
+  cards.push(inf);
+  // For each slope m in [0..n-1] and intercept b in [0..n-1]
+  for(let m=0;m<n;m++){
+    for(let b=0;b<n;b++){
+      const line=[n+1+m]; // point at infinity for slope m
+      for(let x=0;x<n;x++){
+        const y=((m*x+b)%n);
+        line.push(n+1+n + x*n+y);
+      }
+      cards.push(line);
+    }
+  }
+  // one more for each x=inf line
+  for(let x=0;x<n;x++){
+    const line=[n+1+n+n+x]; // new point
+    // actually re-do with standard algo
+  }
+  // ---- Use pre-computed valid deck instead ----
+  return precomputedDobble31();
+}
+
+function precomputedDobble31(){
+  // Valid Dobble/Spot-it 31-card deck (projective plane order 5)
+  // Each pair of cards shares exactly 1 symbol (indices 0-30)
+  const deck=[];
+  const p=5;
+  // Points: (i,j) for i,j in 0..4 → index i*5+j, plus 25 points
+  // Plus 6 points at infinity: (inf,0)..(inf,5)
+  // Lines of PG(2,5):
+  // Type 1: "line at infinity" = {inf0,inf1,inf2,inf3,inf4,inf5}
+  // Type 2: for each m in 0..4: {inf_m} + {(x, mx+b mod 5) : x in 0..4} for each b
+  // Remap: inf_i → i (i=0..5), finite point (x,y)→6+x*5+y
+  const inf=i=>i;
+  const fin=(x,y)=>6+x*5+y;
+  // Line at infinity
+  deck.push([0,1,2,3,4,5]);
+  for(let m=0;m<p;m++){
+    for(let b=0;b<p;b++){
+      const card=[inf(m)];
+      for(let x=0;x<p;x++) card.push(fin(x,(m*x+b)%p));
+      deck.push(card);
+    }
+  }
+  // Vertical lines x=c: {inf_5} + {(c,0),(c,1),(c,2),(c,3),(c,4)}
+  for(let c=0;c<p;c++){
+    const card=[inf(5)];
+    for(let y=0;y<p;y++) card.push(fin(c,y));
+    deck.push(card);
+  }
+  return deck; // 1 + 25 + 5 = 31 cards ✓
+}
+
+const DECK = precomputedDobble31();
+
+// images[i] = {src: dataURL, cropX, cropY, scale} (31 slots)
+const images = new Array(MAX).fill(null);
+let editingIndex = -1;
+
+// editor drag state
+let editorDrag={active:false,startX:0,startY:0,ox:0,oy:0};
+let editorState={x:0,y:0,scale:1,naturalW:0,naturalH:0};
+
+// ============================================================
+//  DOM refs
+// ============================================================
+const uploadArea=document.getElementById('uploadArea');
+const fileInput=document.getElementById('fileInput');
+const countDisplay=document.getElementById('countDisplay');
+const thumbGrid=document.getElementById('thumbGrid');
+const generateBtn=document.getElementById('generateBtn');
+const downloadBtn=document.getElementById('downloadBtn');
+const printBtn=document.getElementById('printBtn');
+const clearBtn=document.getElementById('clearBtn');
+const preview=document.getElementById('preview');
+const sizeSelect=document.getElementById('sizeSelect');
+const modalBg=document.getElementById('modalBg');
+const editorArea=document.getElementById('editorArea');
+const editorImg=document.getElementById('editorImg');
+const zoomSlider=document.getElementById('zoomSlider');
+const zoomVal=document.getElementById('zoomVal');
+const cancelEdit=document.getElementById('cancelEdit');
+const confirmEdit=document.getElementById('confirmEdit');
+
+// ============================================================
+//  UPLOAD
+// ============================================================
+uploadArea.addEventListener('click',()=>fileInput.click());
+uploadArea.addEventListener('dragover',e=>{e.preventDefault();uploadArea.style.borderColor='#555'});
+uploadArea.addEventListener('dragleave',()=>uploadArea.style.borderColor='#ccc');
+uploadArea.addEventListener('drop',e=>{e.preventDefault();uploadArea.style.borderColor='#ccc';handleFiles(e.dataTransfer.files)});
+fileInput.addEventListener('change',()=>handleFiles(fileInput.files));
+
+function handleFiles(files){
+  const arr=[...files].filter(f=>f.type.startsWith('image/'));
+  let slot=images.indexOf(null);
+  for(const f of arr){
+    if(slot>=MAX) break;
+    const reader=new FileReader();
+    const idx=slot;
+    reader.onload=e=>{
+      images[idx]={src:e.target.result,x:0,y:0,scale:1};
+      renderThumbs();
+      updateUI();
     };
-    reader.readAsDataURL(file);
-  });
+    reader.readAsDataURL(f);
+    slot=findNextSlot(slot+1);
+  }
+  fileInput.value='';
+}
+
+function findNextSlot(from){
+  for(let i=from;i<MAX;i++) if(!images[i]) return i;
+  return MAX; // full
+}
+
+// ============================================================
+//  THUMBNAILS
+// ============================================================
+function renderThumbs(){
+  thumbGrid.innerHTML='';
+  for(let i=0;i<MAX;i++){
+    if(images[i]){
+      const cell=document.createElement('div');
+      cell.className='thumb-cell';
+      cell.title=`Click to edit crop`;
+      const c=document.createElement('canvas');
+      c.width=80;c.height=80;
+      drawCroppedCircle(c,images[i]);
+      cell.appendChild(c);
+      const eb=document.createElement('div');
+      eb.className='edit-btn';eb.textContent='✎ Edit';
+      cell.appendChild(eb);
+      const rb=document.createElement('button');
+      rb.className='remove-btn';rb.textContent='×';rb.title='Remove';
+      rb.addEventListener('click',ev=>{ev.stopPropagation();images[i]=null;renderThumbs();updateUI()});
+      cell.appendChild(rb);
+      cell.addEventListener('click',()=>openEditor(i));
+      thumbGrid.appendChild(cell);
+    } else {
+      const empty=document.createElement('div');
+      empty.className='thumb-cell slot-empty';
+      empty.textContent=i+1;
+      thumbGrid.appendChild(empty);
+    }
+  }
+}
+
+function drawCroppedCircle(canvas, imgData){
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  const img=new Image();
+  img.onload=()=>{
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(W/2,H/2,W/2,0,Math.PI*2);
+    ctx.clip();
+    const s=imgData.scale;
+    const iw=img.naturalWidth*s*(W/200);
+    const ih=img.naturalHeight*s*(W/200);
+    const ix=W/2-iw/2+imgData.x*(W/200);
+    const iy=H/2-ih/2+imgData.y*(W/200);
+    ctx.drawImage(img,ix,iy,iw,ih);
+    ctx.restore();
+  };
+  img.src=imgData.src;
+}
+
+// ============================================================
+//  EDITOR MODAL
+// ============================================================
+function openEditor(idx){
+  editingIndex=idx;
+  const d=images[idx];
+  const img=new Image();
+  img.onload=()=>{
+    editorState.naturalW=img.naturalWidth;
+    editorState.naturalH=img.naturalHeight;
+    editorState.x=d.x;
+    editorState.y=d.y;
+    editorState.scale=d.scale;
+    zoomSlider.value=Math.round(d.scale*100);
+    zoomVal.textContent=Math.round(d.scale*100)+'%';
+    editorImg.src=d.src;
+    editorImg.onload=()=>updateEditorTransform();
+    modalBg.classList.add('open');
+  };
+  img.src=d.src;
+}
+
+function updateEditorTransform(){
+  const areaSize=340;
+  const s=editorState.scale;
+  const iw=editorState.naturalW;
+  const ih=editorState.naturalH;
+  // fit natural image to 200px base, then scale
+  const base=200;
+  const ratio=Math.max(base/iw,base/ih);
+  const dw=iw*ratio*s;
+  const dh=ih*ratio*s;
+  editorImg.style.width=dw+'px';
+  editorImg.style.height=dh+'px';
+  editorImg.style.left=(areaSize/2-dw/2+editorState.x)+'px';
+  editorImg.style.top=(areaSize/2-dh/2+editorState.y)+'px';
+}
+
+zoomSlider.addEventListener('input',()=>{
+  editorState.scale=parseInt(zoomSlider.value)/100;
+  zoomVal.textContent=zoomSlider.value+'%';
+  updateEditorTransform();
 });
 
-/* ── Dobble math: projective plane order 5 → 31 cards, 6 symbols each ── */
-function buildCardSets() {
-  const n = 5, cards = [];
-  const first = [];
-  for (let i = 0; i <= n; i++) first.push(i);
-  cards.push(first);
-  for (let r = 0; r < n; r++) {
-    const c = [0];
-    for (let j = 0; j < n; j++) c.push(n + 1 + r * n + j);
-    cards.push(c);
-  }
-  for (let r = 0; r < n; r++) {
-    for (let c = 0; c < n; c++) {
-      const card = [r + 1];
-      for (let k = 0; k < n; k++) card.push(n + 1 + k * n + ((c + r * k) % n));
-      cards.push(card);
-    }
-  }
-  return cards;
+// drag inside editor
+editorArea.addEventListener('mousedown',e=>{
+  editorDrag={active:true,startX:e.clientX,startY:e.clientY,ox:editorState.x,oy:editorState.y};
+  editorArea.classList.add('grabbing');
+});
+document.addEventListener('mousemove',e=>{
+  if(!editorDrag.active)return;
+  editorState.x=editorDrag.ox+(e.clientX-editorDrag.startX);
+  editorState.y=editorDrag.oy+(e.clientY-editorDrag.startY);
+  updateEditorTransform();
+});
+document.addEventListener('mouseup',()=>{editorDrag.active=false;editorArea.classList.remove('grabbing')});
+// touch
+editorArea.addEventListener('touchstart',e=>{
+  const t=e.touches[0];
+  editorDrag={active:true,startX:t.clientX,startY:t.clientY,ox:editorState.x,oy:editorState.y};
+},{passive:true});
+document.addEventListener('touchmove',e=>{
+  if(!editorDrag.active)return;
+  const t=e.touches[0];
+  editorState.x=editorDrag.ox+(t.clientX-editorDrag.startX);
+  editorState.y=editorDrag.oy+(t.clientY-editorDrag.startY);
+  updateEditorTransform();
+},{passive:true});
+document.addEventListener('touchend',()=>{editorDrag.active=false});
+
+confirmEdit.addEventListener('click',()=>{
+  images[editingIndex].x=editorState.x;
+  images[editingIndex].y=editorState.y;
+  images[editingIndex].scale=editorState.scale;
+  modalBg.classList.remove('open');
+  renderThumbs();
+});
+cancelEdit.addEventListener('click',()=>modalBg.classList.remove('open'));
+modalBg.addEventListener('click',e=>{if(e.target===modalBg)modalBg.classList.remove('open')});
+
+// ============================================================
+//  UPDATE UI STATE
+// ============================================================
+function updateUI(){
+  const count=images.filter(Boolean).length;
+  countDisplay.textContent=count;
+  const ready=count===MAX;
+  generateBtn.disabled=!ready;
 }
 
-/* ── Place 6 symbols in a circle, scattered like real Dobble ──
- * Uses a fixed layout of 6 non-overlapping positions at varied sizes/angles,
- * all guaranteed to stay inside the circle.
- */
-function getSymbolLayouts() {
-  // Each: { cx, cy, size, angle } — in unit coords (0-1 of card diameter)
-  // Tuned so all circles stay within the card circle
-  return [
-    { cx: 0.50, cy: 0.25, size: 0.28, angle:  12 },
-    { cx: 0.77, cy: 0.45, size: 0.22, angle: -18 },
-    { cx: 0.68, cy: 0.74, size: 0.25, angle:  25 },
-    { cx: 0.38, cy: 0.78, size: 0.20, angle: -10 },
-    { cx: 0.20, cy: 0.52, size: 0.26, angle:  15 },
-    { cx: 0.32, cy: 0.28, size: 0.21, angle: -20 },
-  ];
+clearBtn.addEventListener('click',()=>{
+  images.fill(null);
+  preview.innerHTML='';
+  downloadBtn.disabled=true;
+  printBtn.disabled=true;
+  renderThumbs();
+  updateUI();
+});
+
+// ============================================================
+//  GENERATE CARDS
+// ============================================================
+let generatedCanvases=[];
+
+generateBtn.addEventListener('click',generateCards);
+
+function generateCards(){
+  preview.innerHTML='<p style="color:#888;font-size:13px">Generating cards…</p>';
+  generatedCanvases=[];
+  const size=parseInt(sizeSelect.value);
+  const total=DECK.length; // 31
+  let done=0;
+
+  DECK.forEach((symbols,cardIdx)=>{
+    const canvas=document.createElement('canvas');
+    canvas.width=size;canvas.height=size;
+    drawCard(canvas,symbols,cardIdx,()=>{
+      generatedCanvases[cardIdx]=canvas;
+      done++;
+      if(done===total) showPreview(size);
+    });
+  });
 }
 
-/* ── Draw one card on a canvas ──
- * cardCanvas: HTMLCanvasElement (pre-sized)
- * symbols: array of 6 image indices
- */
-function drawCard(cardCanvas, symbols, cardIndex) {
-  const sz = cardCanvas.width; // square canvas
-  const ctx = cardCanvas.getContext('2d');
-  const r = sz / 2;
+function drawCard(canvas,symbols,cardIdx,callback){
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height,R=W/2;
+  ctx.clearRect(0,0,W,H);
 
-  // Background
-  ctx.clearRect(0, 0, sz, sz);
+  // Card background circle
   ctx.save();
-  ctx.beginPath();
-  ctx.arc(r, r, r - 4, 0, Math.PI * 2);
-  ctx.fillStyle = '#ffffff';
-  ctx.fill();
+  ctx.beginPath();ctx.arc(R,R,R-2,0,Math.PI*2);
+  ctx.fillStyle='#fff';ctx.fill();
+  ctx.strokeStyle='#333';ctx.lineWidth=3;ctx.stroke();
   ctx.restore();
 
-  // Subtle background circle decoration
-  ctx.save();
-  ctx.beginPath();
-  ctx.arc(r, r, r - 4, 0, Math.PI * 2);
-  ctx.strokeStyle = '#2c2c54';
-  ctx.lineWidth = Math.max(3, sz * 0.006);
-  ctx.stroke();
-  ctx.restore();
+  // Place symbols in a circle layout
+  const n=symbols.length; // 6
+  const loaded=[];
+  let loadedCount=0;
 
-  const layouts = getSymbolLayouts();
-
-  symbols.forEach((symIdx, i) => {
-    const layout = layouts[i];
-    const imgObj = imgObjs[symIdx];
-    if (!imgObj || !imgObj.complete) return;
-
-    const symPx = layout.size * sz;      // size of symbol in pixels
-    const cx = layout.cx * sz;
-    const cy = layout.cy * sz;
-    const angleDeg = layout.angle;
-
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate(angleDeg * Math.PI / 180);
-
-    // Clip to rounded square for the symbol
-    const half = symPx / 2;
-    const rad  = symPx * 0.18;
-    ctx.beginPath();
-    ctx.moveTo(-half + rad, -half);
-    ctx.lineTo( half - rad, -half);
-    ctx.quadraticCurveTo( half, -half,  half, -half + rad);
-    ctx.lineTo( half,  half - rad);
-    ctx.quadraticCurveTo( half,  half,  half - rad,  half);
-    ctx.lineTo(-half + rad,  half);
-    ctx.quadraticCurveTo(-half,  half, -half,  half - rad);
-    ctx.lineTo(-half, -half + rad);
-    ctx.quadraticCurveTo(-half, -half, -half + rad, -half);
-    ctx.closePath();
-    ctx.clip();
-
-    // Draw image, centered and covering the clip area
-    const iw = imgObj.naturalWidth  || imgObj.width  || 1;
-    const ih = imgObj.naturalHeight || imgObj.height || 1;
-    const scale = Math.max(symPx / iw, symPx / ih);
-    const dw = iw * scale;
-    const dh = ih * scale;
-    ctx.drawImage(imgObj, -dw/2, -dh/2, dw, dh);
-
-    ctx.restore();
-
-    // Thin border around symbol
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate(angleDeg * Math.PI / 180);
-    ctx.beginPath();
-    ctx.moveTo(-half + rad, -half);
-    ctx.lineTo( half - rad, -half);
-    ctx.quadraticCurveTo( half, -half,  half, -half + rad);
-    ctx.lineTo( half,  half - rad);
-    ctx.quadraticCurveTo( half,  half,  half - rad,  half);
-    ctx.lineTo(-half + rad,  half);
-    ctx.quadraticCurveTo(-half,  half, -half,  half - rad);
-    ctx.lineTo(-half, -half + rad);
-    ctx.quadraticCurveTo(-half, -half, -half + rad, -half);
-    ctx.closePath();
-    ctx.strokeStyle = 'rgba(0,0,0,0.15)';
-    ctx.lineWidth = Math.max(1, sz * 0.003);
-    ctx.stroke();
-    ctx.restore();
+  symbols.forEach((symIdx,i)=>{
+    const imgData=images[symIdx];
+    if(!imgData){loadedCount++;if(loadedCount===n)render();return;}
+    const img=new Image();
+    img.onload=()=>{
+      loaded[i]={img,data:imgData};
+      loadedCount++;
+      if(loadedCount===n)render();
+    };
+    img.onerror=()=>{loadedCount++;if(loadedCount===n)render()};
+    img.src=imgData.src;
   });
 
-  // Card number (small, inside circle at bottom)
-  ctx.save();
-  const fontSize = Math.max(10, sz * 0.055);
-  ctx.font = `bold ${fontSize}px Arial`;
-  ctx.fillStyle = 'rgba(44,44,84,0.5)';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('#' + (cardIndex + 1), r, sz * 0.93);
-  ctx.restore();
-}
+  function render(){
+    // Positions for 6 symbols on a card (varied angles/sizes like real Dobble)
+    const positions=[
+      {r:0.30,angle:0,   size:0.28},
+      {r:0.30,angle:60,  size:0.26},
+      {r:0.30,angle:120, size:0.30},
+      {r:0.30,angle:180, size:0.27},
+      {r:0.30,angle:240, size:0.25},
+      {r:0.30,angle:300, size:0.29},
+    ];
+    // Actually spread them out better
+    const layouts=[
+      {cx:0.5, cy:0.22, sz:0.22, rot:15},
+      {cx:0.78,cy:0.40, sz:0.20, rot:-10},
+      {cx:0.72,cy:0.72, sz:0.23, rot:25},
+      {cx:0.50,cy:0.80, sz:0.21, rot:-20},
+      {cx:0.28,cy:0.68, sz:0.22, rot:10},
+      {cx:0.22,cy:0.38, sz:0.20, rot:-15},
+    ];
 
-/* ── Render all cards as canvases ── */
-function renderAllCards(previewSize) {
-  const grid = document.getElementById('canvas-grid');
-  grid.innerHTML = '';
+    layouts.forEach((pos,i)=>{
+      const ld=loaded[i];
+      if(!ld)return;
+      const symSize=W*pos.sz;
+      const cx=W*pos.cx;
+      const cy=H*pos.cy;
+      ctx.save();
+      ctx.translate(cx,cy);
+      ctx.rotate(pos.rot*Math.PI/180);
+      ctx.beginPath();
+      ctx.arc(0,0,symSize/2,0,Math.PI*2);
+      ctx.clip();
+      // Draw image centered, applying user crop offset+scale
+      const {img,data}=ld;
+      const base=symSize;
+      const ratio=Math.max(base/img.naturalWidth,base/img.naturalHeight);
+      const dw=img.naturalWidth*ratio*data.scale;
+      const dh=img.naturalHeight*ratio*data.scale;
+      // user offsets are in 200px space → scale to symSize
+      const scaleF=symSize/200;
+      ctx.drawImage(img,-dw/2+data.x*scaleF,-dh/2+data.y*scaleF,dw,dh);
+      ctx.restore();
 
-  cardSets.forEach((symbols, idx) => {
-    const canvas = document.createElement('canvas');
-    canvas.width  = CARD_RENDER_SIZE;
-    canvas.height = CARD_RENDER_SIZE;
-    canvas.className = 'card-canvas';
-    canvas.style.width  = previewSize + 'px';
-    canvas.style.height = previewSize + 'px';
-    canvas.style.borderRadius = '50%';
-    canvas.style.border = '3px solid #2c2c54';
-
-    // Wait for all images to load before drawing
-    waitForImages(symbols, () => {
-      drawCard(canvas, symbols, idx);
+      // Circle border around symbol
+      ctx.save();
+      ctx.translate(cx,cy);
+      ctx.beginPath();ctx.arc(0,0,symSize/2,0,Math.PI*2);
+      ctx.strokeStyle='rgba(0,0,0,0.15)';ctx.lineWidth=1.5;ctx.stroke();
+      ctx.restore();
     });
 
-    grid.appendChild(canvas);
-  });
-}
-
-function waitForImages(symbols, cb) {
-  const needed = symbols.map(i => imgObjs[i]).filter(Boolean);
-  let loaded = 0;
-  if (needed.length === 0) { cb(); return; }
-  needed.forEach(img => {
-    if (img.complete) {
-      loaded++;
-      if (loaded === needed.length) cb();
-    } else {
-      img.onload = () => { loaded++; if (loaded === needed.length) cb(); };
-    }
-  });
-}
-
-/* ── Generate ── */
-function generate() {
-  const errEl = document.getElementById('err');
-  errEl.style.display = 'none';
-  const filled = images.filter(Boolean).length;
-  if (filled < 31) {
-    errEl.textContent = `Need 31 images. You have ${filled}. Please upload more.`;
-    errEl.style.display = 'block';
-    return;
+    callback();
   }
-
-  cardSets = buildCardSets();
-  const prevSize = parseInt(document.getElementById('prev-size').value);
-
-  document.getElementById('preview-label').textContent = '31 cards generated';
-  renderAllCards(prevSize);
-
-  document.getElementById('preview').style.display = 'block';
-  document.getElementById('btn-pdf').style.display = 'inline-block';
-  document.getElementById('btn-print').style.display = 'inline-block';
-  generated = true;
-
-  document.getElementById('preview').scrollIntoView({ behavior:'smooth' });
 }
 
-/* ── Download PDF ──
- * Renders each card at high res on a fresh canvas, then places on A4 pages
- */
-function downloadPDF() {
-  const infoEl = document.getElementById('info');
-  infoEl.textContent = '⏳ Building PDF… this may take a few seconds.';
-  infoEl.style.display = 'block';
-
-  // Give the browser a moment to show the message
-  setTimeout(() => {
-    try {
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
-
-      const pageW = 210, pageH = 297;
-      const margin = 8;
-      const cardsPerRow = 3;
-      const cardsPerPage = 9; // 3×3
-      const cardMM = (pageW - margin * 2 - (cardsPerRow - 1) * 4) / cardsPerRow; // ~60mm
-      const gap = 4;
-
-      cardSets.forEach((symbols, idx) => {
-        const pageIdx  = Math.floor(idx / cardsPerPage);
-        const localIdx = idx % cardsPerPage;
-
-        // New page
-        if (localIdx === 0 && idx > 0) pdf.addPage();
-
-        const col = localIdx % cardsPerRow;
-        const row = Math.floor(localIdx / cardsPerRow);
-        const xMM = margin + col * (cardMM + gap);
-        const yMM = margin + row * (cardMM + gap);
-
-        // Draw card on offscreen canvas
-        const offscreen = document.createElement('canvas');
-        offscreen.width  = CARD_RENDER_SIZE;
-        offscreen.height = CARD_RENDER_SIZE;
-        drawCard(offscreen, symbols, idx);
-
-        const dataUrl = offscreen.toDataURL('image/jpeg', 0.92);
-        // Add as circle clip using jsPDF
-        // jsPDF doesn't natively clip circles, so we draw the full square image
-        // and rely on the white background + drawn circle border
-        pdf.addImage(dataUrl, 'JPEG', xMM, yMM, cardMM, cardMM);
-      });
-
-      pdf.save('spottix-cards.pdf');
-      infoEl.textContent = '✅ PDF downloaded! Check your Downloads folder.';
-    } catch(e) {
-      document.getElementById('info').style.display = 'none';
-      const errEl = document.getElementById('err');
-      errEl.textContent = 'PDF error: ' + e.message;
-      errEl.style.display = 'block';
-    }
-  }, 80);
+function showPreview(size){
+  preview.innerHTML='';
+  generatedCanvases.forEach((canvas,i)=>{
+    const wrap=document.createElement('div');
+    wrap.className='card-preview-wrap';
+    wrap.appendChild(canvas);
+    const lbl=document.createElement('span');lbl.textContent='Card '+(i+1);
+    wrap.appendChild(lbl);
+    preview.appendChild(wrap);
+  });
+  downloadBtn.disabled=false;
+  printBtn.disabled=false;
 }
 
-function clearAll() {
-  images = []; imgObjs = []; loadedCount = 0; generated = false; cardSets = [];
-  document.getElementById('img-input').value = '';
-  document.getElementById('thumbs').innerHTML = '';
-  document.getElementById('img-count').textContent = '0';
-  document.getElementById('canvas-grid').innerHTML = '';
-  document.getElementById('preview').style.display = 'none';
-  document.getElementById('btn-pdf').style.display = 'none';
-  document.getElementById('btn-print').style.display = 'none';
-  document.getElementById('err').style.display = 'none';
-  document.getElementById('info').style.display = 'none';
-}
+// ============================================================
+//  PDF DOWNLOAD
+// ============================================================
+downloadBtn.addEventListener('click',async()=>{
+  if(!generatedCanvases.length)return;
+  downloadBtn.disabled=true;
+  downloadBtn.textContent='⏳ Building PDF…';
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const pageW=210,pageH=297,margin=10;
+  const cardMM=55;
+  const cols=3,rows=4;
+  const gapX=(pageW-margin*2-cols*cardMM)/(cols-1);
+  const gapY=(pageH-margin*2-rows*cardMM)/(rows-1);
+  let col=0,row=0;
+  for(let i=0;i<generatedCanvases.length;i++){
+    if(i>0&&col===0&&row===0) doc.addPage();
+    const x=margin+col*(cardMM+gapX);
+    const y=margin+row*(cardMM+gapY);
+    doc.addImage(generatedCanvases[i].toDataURL('image/png'),x,y,cardMM,cardMM);
+    col++;if(col>=cols){col=0;row++;if(row>=rows){col=0;row=0;}}
+  }
+  doc.save('spottix-cards.pdf');
+  downloadBtn.disabled=false;
+  downloadBtn.textContent='⬇️ Download PDF';
+});
+
+// ============================================================
+//  PRINT
+// ============================================================
+printBtn.addEventListener('click',()=>{
+  const w=window.open('','_blank');
+  w.document.write(`<html><head><title>Spottix Cards</title><style>
+    body{margin:0;padding:10px;background:#fff}
+    .page{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-start}
+    canvas{border-radius:50%}
+    @media print{body{padding:0}canvas{page-break-inside:avoid}}
+  </style></head><body><div class="page">`);
+  generatedCanvases.forEach(c=>w.document.write(c.outerHTML));
+  w.document.write('</div></body></html>');
+  w.document.close();
+  w.onload=()=>w.print();
+});
+
+// init
+renderThumbs();
+updateUI();
 </script>
 </body>
 </html>
