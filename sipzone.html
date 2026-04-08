@@ -588,13 +588,13 @@ body {
       </div>
       <div class="setting-card">
         <label>Alcím / Tagline</label>
-        <input type="text" id="gameTagline" value="The Ultimate Drinking Board Game" oninput="updateAll()">
+        <input type="text" id="gameTagline" value="A legjobb ivós társasjáték" oninput="updateAll()">
       </div>
       <div class="setting-card">
         <label>Nyelv / Language</label>
         <select id="gameLang" onchange="updateAll()">
-          <option value="hu">🇭🇺 Magyar</option>
-          <option value="en" selected>🇬🇧 English</option>
+          <option value="hu" selected>🇭🇺 Magyar</option>
+          <option value="en">🇬🇧 English</option>
         </select>
       </div>
       <div class="setting-card">
@@ -885,7 +885,7 @@ function getCenterNote() { return document.getElementById('centerNote')?.value |
 //  INIT
 // ============================================================
 window.onload = () => {
-  cards = defaultCards['en'].map(c => ({...c}));
+  cards = defaultCards['hu'].map(c => ({...c}));
   renderCardsEditor();
   renderSpacesEditor();
   updateAll();
@@ -1182,7 +1182,7 @@ function buildRulesHTML() {
       <h3 style="background:${r.cards.color}">${r.cards.title}</h3>
       <p>${r.cards.body}</p>
     </div>
-    <div class="rules-footer">${title} — ${t.rules_subtitle} · Made with Realm Forge</div>
+    <div class="rules-footer">${title} — ${t.rules_subtitle} · Készítve: Realm Forge</div>
   </div>`;
 }
 
@@ -1203,7 +1203,7 @@ function openPrintWindow(html) {
   </style>
   </head><body>${html}
   <div style="text-align:center;padding:16px;font-size:13px;color:#888">
-    <button onclick="window.print()" style="padding:12px 28px;background:#2d2d2d;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:Nunito,sans-serif">🖨️ Print / Save as PDF</button>
+    <button onclick="window.print()" style="padding:12px 28px;background:#2d2d2d;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:Nunito,sans-serif">🖨️ Nyomtatás / Mentés PDF-ként</button>
   </div>
   </body></html>`);
   w.document.close();
