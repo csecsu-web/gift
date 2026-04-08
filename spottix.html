@@ -49,9 +49,11 @@
   .btn-danger:hover{background:#fdf5f5}
 
   /* Preview */
-  #preview{display:flex;flex-wrap:wrap;gap:12px;margin-top:24px}
+  #preview{display:flex;flex-wrap:wrap;gap:16px;margin-top:24px}
   .card-preview-wrap{display:flex;flex-direction:column;align-items:center;gap:4px}
   .card-preview-wrap span{font-size:11px;color:#999}
+  /* preview canvases are high-res internally but shown smaller on screen */
+  .card-preview-wrap canvas{border-radius:50%;display:block}
 
   /* ======= IMAGE EDITOR MODAL ======= */
   .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:1000;align-items:center;justify-content:center}
@@ -93,13 +95,7 @@
   <div class="thumb-grid" id="thumbGrid"></div>
 
   <div class="controls">
-    <label>Preview size:
-      <select id="sizeSelect">
-        <option value="160">Small</option>
-        <option value="220" selected>Medium</option>
-        <option value="300">Large</option>
-      </select>
-    </label>
+    <span style="font-size:13px;color:#555">Nyomtatási minőség: <strong>600px/kártya (print-ready)</strong></span>
     <button class="btn btn-primary" id="generateBtn" disabled>🎯 Generate Cards</button>
     <button class="btn btn-secondary" id="downloadBtn" disabled>⬇️ Download PDF</button>
     <button class="btn btn-secondary" id="printBtn" disabled>🖨️ Print</button>
@@ -129,7 +125,6 @@
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 // ============================================================
 //  STATE
@@ -232,7 +227,7 @@ const downloadBtn=document.getElementById('downloadBtn');
 const printBtn=document.getElementById('printBtn');
 const clearBtn=document.getElementById('clearBtn');
 const preview=document.getElementById('preview');
-const sizeSelect=document.getElementById('sizeSelect');
+// sizeSelect removed — fixed CARD_PX resolution used instead
 const modalBg=document.getElementById('modalBg');
 const editorArea=document.getElementById('editorArea');
 const editorImg=document.getElementById('editorImg');
@@ -353,11 +348,10 @@ function updateEditorTransform(){
   const s=editorState.scale;
   const iw=editorState.naturalW;
   const ih=editorState.naturalH;
-  // fit natural image to 200px base, then scale
-  const base=200;
-  const ratio=Math.max(base/iw,base/ih);
-  const dw=iw*ratio*s;
-  const dh=ih*ratio*s;
+  // same "cover" logic as drawCard: fill the circle, then apply user scale on top
+  const coverRatio=Math.max(areaSize/iw, areaSize/ih);
+  const dw=iw*coverRatio*s;
+  const dh=ih*coverRatio*s;
   editorImg.style.width=dw+'px';
   editorImg.style.height=dh+'px';
   editorImg.style.left=(areaSize/2-dw/2+editorState.x)+'px';
@@ -427,170 +421,243 @@ clearBtn.addEventListener('click',()=>{
 
 // ============================================================
 //  GENERATE CARDS
+//  - CARD_PX: internal canvas resolution (high-res for print)
+//  - PREVIEW_PX: display size on screen
 // ============================================================
-let generatedCanvases=[];
+const CARD_PX = 600;   // 600×600px internal → sharp at 150dpi on 10cm card
+const PREVIEW_PX = 160; // shown on screen
 
-generateBtn.addEventListener('click',generateCards);
+// 6 symbol layouts — bigger circles, good spread, no overlap
+// cx/cy = center as fraction of card, sz = symbol diameter as fraction
+const LAYOUTS = [
+  {cx:0.50, cy:0.20, sz:0.30, rot:  8},
+  {cx:0.80, cy:0.38, sz:0.28, rot:-15},
+  {cx:0.74, cy:0.72, sz:0.31, rot: 20},
+  {cx:0.50, cy:0.82, sz:0.29, rot:-12},
+  {cx:0.26, cy:0.70, sz:0.30, rot: 18},
+  {cx:0.20, cy:0.36, sz:0.28, rot: -8},
+];
 
-function generateCards(){
-  preview.innerHTML='<p style="color:#888;font-size:13px">Generating cards…</p>';
-  generatedCanvases=[];
-  const size=parseInt(sizeSelect.value);
-  const total=DECK.length; // 31
-  let done=0;
+let generatedCanvases = [];
 
-  DECK.forEach((symbols,cardIdx)=>{
-    const canvas=document.createElement('canvas');
-    canvas.width=size;canvas.height=size;
-    drawCard(canvas,symbols,cardIdx,()=>{
-      generatedCanvases[cardIdx]=canvas;
-      done++;
-      if(done===total) showPreview(size);
-    });
-  });
-}
+generateBtn.addEventListener('click', generateCards);
 
-function drawCard(canvas,symbols,cardIdx,callback){
-  const ctx=canvas.getContext('2d');
-  const W=canvas.width,H=canvas.height,R=W/2;
-  ctx.clearRect(0,0,W,H);
+function generateCards() {
+  preview.innerHTML = '<p style="color:#888;font-size:14px;padding:8px">⏳ Generating cards — this may take a few seconds…</p>';
+  generateBtn.disabled = true;
+  generatedCanvases = [];
+  const total = DECK.length;
+  let done = 0;
 
-  // Card background circle
-  ctx.save();
-  ctx.beginPath();ctx.arc(R,R,R-2,0,Math.PI*2);
-  ctx.fillStyle='#fff';ctx.fill();
-  ctx.strokeStyle='#333';ctx.lineWidth=3;ctx.stroke();
-  ctx.restore();
+  // Pre-load all images once so each drawCard can reuse them
+  const imgCache = new Array(MAX).fill(null);
+  let cacheLoaded = 0;
 
-  // Place symbols in a circle layout
-  const n=symbols.length; // 6
-  const loaded=[];
-  let loadedCount=0;
-
-  symbols.forEach((symIdx,i)=>{
-    const imgData=images[symIdx];
-    if(!imgData){loadedCount++;if(loadedCount===n)render();return;}
-    const img=new Image();
-    img.onload=()=>{
-      loaded[i]={img,data:imgData};
-      loadedCount++;
-      if(loadedCount===n)render();
-    };
-    img.onerror=()=>{loadedCount++;if(loadedCount===n)render()};
-    img.src=imgData.src;
+  images.forEach((imgData, idx) => {
+    if (!imgData) { cacheLoaded++; checkStart(); return; }
+    const img = new Image();
+    img.onload = () => { imgCache[idx] = img; cacheLoaded++; checkStart(); };
+    img.onerror = () => { cacheLoaded++; checkStart(); };
+    img.src = imgData.src;
   });
 
-  function render(){
-    // Positions for 6 symbols on a card (varied angles/sizes like real Dobble)
-    const positions=[
-      {r:0.30,angle:0,   size:0.28},
-      {r:0.30,angle:60,  size:0.26},
-      {r:0.30,angle:120, size:0.30},
-      {r:0.30,angle:180, size:0.27},
-      {r:0.30,angle:240, size:0.25},
-      {r:0.30,angle:300, size:0.29},
-    ];
-    // Actually spread them out better
-    const layouts=[
-      {cx:0.5, cy:0.22, sz:0.22, rot:15},
-      {cx:0.78,cy:0.40, sz:0.20, rot:-10},
-      {cx:0.72,cy:0.72, sz:0.23, rot:25},
-      {cx:0.50,cy:0.80, sz:0.21, rot:-20},
-      {cx:0.28,cy:0.68, sz:0.22, rot:10},
-      {cx:0.22,cy:0.38, sz:0.20, rot:-15},
-    ];
-
-    layouts.forEach((pos,i)=>{
-      const ld=loaded[i];
-      if(!ld)return;
-      const symSize=W*pos.sz;
-      const cx=W*pos.cx;
-      const cy=H*pos.cy;
-      ctx.save();
-      ctx.translate(cx,cy);
-      ctx.rotate(pos.rot*Math.PI/180);
-      ctx.beginPath();
-      ctx.arc(0,0,symSize/2,0,Math.PI*2);
-      ctx.clip();
-      // Draw image centered, applying user crop offset+scale
-      const {img,data}=ld;
-      const base=symSize;
-      const ratio=Math.max(base/img.naturalWidth,base/img.naturalHeight);
-      const dw=img.naturalWidth*ratio*data.scale;
-      const dh=img.naturalHeight*ratio*data.scale;
-      // user offsets are in 200px space → scale to symSize
-      const scaleF=symSize/200;
-      ctx.drawImage(img,-dw/2+data.x*scaleF,-dh/2+data.y*scaleF,dw,dh);
-      ctx.restore();
-
-      // Circle border around symbol
-      ctx.save();
-      ctx.translate(cx,cy);
-      ctx.beginPath();ctx.arc(0,0,symSize/2,0,Math.PI*2);
-      ctx.strokeStyle='rgba(0,0,0,0.15)';ctx.lineWidth=1.5;ctx.stroke();
-      ctx.restore();
-    });
-
-    callback();
+  function checkStart() {
+    if (cacheLoaded < MAX) return;
+    // All images loaded — now draw cards one by one (async to avoid blocking)
+    let cardIdx = 0;
+    function drawNext() {
+      if (cardIdx >= total) return;
+      const ci = cardIdx++;
+      const canvas = document.createElement('canvas');
+      canvas.width = CARD_PX;
+      canvas.height = CARD_PX;
+      drawCard(canvas, DECK[ci], imgCache, () => {
+        generatedCanvases[ci] = canvas;
+        done++;
+        if (done === total) showPreview();
+        else setTimeout(drawNext, 0);
+      });
+      setTimeout(drawNext, 0);
+    }
+    // Start 4 parallel draws
+    for (let p = 0; p < 4; p++) drawNext();
   }
 }
 
-function showPreview(size){
-  preview.innerHTML='';
-  generatedCanvases.forEach((canvas,i)=>{
-    const wrap=document.createElement('div');
-    wrap.className='card-preview-wrap';
-    wrap.appendChild(canvas);
-    const lbl=document.createElement('span');lbl.textContent='Card '+(i+1);
+function drawCard(canvas, symbols, imgCache, callback) {
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  const W = canvas.width;
+  const R = W / 2;
+
+  // White circle background
+  ctx.clearRect(0, 0, W, W);
+  ctx.save();
+  ctx.beginPath(); ctx.arc(R, R, R - 4, 0, Math.PI * 2);
+  ctx.fillStyle = '#ffffff'; ctx.fill();
+  ctx.strokeStyle = '#222222'; ctx.lineWidth = 6; ctx.stroke();
+  ctx.restore();
+
+  // Draw each symbol
+  LAYOUTS.forEach((pos, i) => {
+    const symIdx = symbols[i];
+    const imgData = images[symIdx];
+    const img = imgCache[symIdx];
+    if (!imgData || !img) return;
+
+    const symR = (W * pos.sz) / 2;   // symbol radius in pixels
+    const cx = W * pos.cx;
+    const cy = W * pos.cy;
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(pos.rot * Math.PI / 180);
+
+    // Clip to circle
+    ctx.beginPath();
+    ctx.arc(0, 0, symR, 0, Math.PI * 2);
+    ctx.clip();
+
+    // Fill white background inside symbol circle
+    ctx.fillStyle = '#ffffff';
+    ctx.fill();
+
+    // Draw image — cover the circle, respect user crop (x, y in editor-space, scale)
+    // Editor space = 340px circle. Map to symR*2 circle.
+    const editorR = 170; // half of 340px editor
+    const scaleFactor = symR / editorR;
+
+    // Base: fit image to cover the symbol circle at scale=1
+    const coverRatio = Math.max((symR * 2) / img.naturalWidth, (symR * 2) / img.naturalHeight);
+    const dw = img.naturalWidth  * coverRatio * imgData.scale;
+    const dh = img.naturalHeight * coverRatio * imgData.scale;
+    const dx = -dw / 2 + imgData.x * scaleFactor;
+    const dy = -dh / 2 + imgData.y * scaleFactor;
+
+    ctx.drawImage(img, dx, dy, dw, dh);
+    ctx.restore();
+
+    // Symbol border ring
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.beginPath(); ctx.arc(0, 0, symR, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(0,0,0,0.20)';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.restore();
+  });
+
+  callback();
+}
+
+function showPreview() {
+  preview.innerHTML = '';
+  generatedCanvases.forEach((canvas, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'card-preview-wrap';
+
+    // Show a scaled-down version on screen but keep full-res canvas for export
+    const previewCanvas = document.createElement('canvas');
+    previewCanvas.width  = PREVIEW_PX;
+    previewCanvas.height = PREVIEW_PX;
+    previewCanvas.style.width  = PREVIEW_PX + 'px';
+    previewCanvas.style.height = PREVIEW_PX + 'px';
+    const pctx = previewCanvas.getContext('2d');
+    pctx.imageSmoothingEnabled = true;
+    pctx.imageSmoothingQuality = 'high';
+    pctx.drawImage(canvas, 0, 0, PREVIEW_PX, PREVIEW_PX);
+
+    wrap.appendChild(previewCanvas);
+    const lbl = document.createElement('span');
+    lbl.textContent = 'Card ' + (i + 1);
     wrap.appendChild(lbl);
     preview.appendChild(wrap);
   });
-  downloadBtn.disabled=false;
-  printBtn.disabled=false;
+  generateBtn.disabled = false;
+  downloadBtn.disabled = false;
+  printBtn.disabled = false;
 }
 
 // ============================================================
-//  PDF DOWNLOAD
+//  PDF DOWNLOAD  (no external library — pure data-URL approach)
+//  Uses browser print-to-PDF via a new window with <img> tags
+//  Each card is exported as a data URL at full CARD_PX resolution
 // ============================================================
-downloadBtn.addEventListener('click',async()=>{
-  if(!generatedCanvases.length)return;
-  downloadBtn.disabled=true;
-  downloadBtn.textContent='⏳ Building PDF…';
-  const {jsPDF}=window.jspdf;
-  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-  const pageW=210,pageH=297,margin=10;
-  const cardMM=55;
-  const cols=3,rows=4;
-  const gapX=(pageW-margin*2-cols*cardMM)/(cols-1);
-  const gapY=(pageH-margin*2-rows*cardMM)/(rows-1);
-  let col=0,row=0;
-  for(let i=0;i<generatedCanvases.length;i++){
-    if(i>0&&col===0&&row===0) doc.addPage();
-    const x=margin+col*(cardMM+gapX);
-    const y=margin+row*(cardMM+gapY);
-    doc.addImage(generatedCanvases[i].toDataURL('image/png'),x,y,cardMM,cardMM);
-    col++;if(col>=cols){col=0;row++;if(row>=rows){col=0;row=0;}}
+downloadBtn.addEventListener('click', async () => {
+  if (!generatedCanvases.length) return;
+  downloadBtn.disabled = true;
+  downloadBtn.textContent = '⏳ Building…';
+
+  // Convert all canvases to PNG data URLs
+  const dataURLs = generatedCanvases.map(c => c.toDataURL('image/png'));
+
+  // Open a print window with img tags at correct mm size
+  // 3 cards per row × ~4 rows per page = 12 per page; card = 60mm
+  const CARD_MM = 60;
+  const COLS = 3;
+  const MARGIN = 8;
+
+  let imgTags = dataURLs.map(url =>
+    `<img src="${url}" width="${CARD_MM}mm" height="${CARD_MM}mm" style="border-radius:50%;display:block;margin:2mm;">`
+  ).join('');
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Spottix Cards</title>
+  <style>
+    @page{size:A4 portrait;margin:${MARGIN}mm}
+    body{margin:0;padding:0;background:#fff}
+    .grid{display:flex;flex-wrap:wrap;justify-content:flex-start;align-items:flex-start;gap:4mm;padding:0}
+    img{box-sizing:border-box;flex-shrink:0;page-break-inside:avoid;border:2px solid #ddd}
+    @media print{.no-print{display:none}}
+  </style></head><body>
+  <div class="no-print" style="padding:12px;background:#f5f5f0;font-family:sans-serif;font-size:13px;margin-bottom:12px">
+    📄 <strong>Mentés PDF-ként:</strong> Kattints a "Nyomtatás" gombra → Célnyomtató: <strong>PDF mentése</strong> → A4, portré, margók: alap. &nbsp;
+    <button onclick="window.print()" style="padding:8px 20px;background:#2a2a2a;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer">🖨️ Nyomtatás / PDF mentése</button>
+  </div>
+  <div class="grid">${imgTags}</div>
+  </body></html>`;
+
+  const w = window.open('', '_blank');
+  if (!w) {
+    alert('Pop-up blokkolva! Engedélyezd a pop-upokat ehhez az oldalhoz, majd próbáld újra.');
+    downloadBtn.disabled = false;
+    downloadBtn.textContent = '⬇️ Download PDF';
+    return;
   }
-  doc.save('spottix-cards.pdf');
-  downloadBtn.disabled=false;
-  downloadBtn.textContent='⬇️ Download PDF';
+  w.document.write(html);
+  w.document.close();
+
+  downloadBtn.disabled = false;
+  downloadBtn.textContent = '⬇️ Download PDF';
 });
 
 // ============================================================
-//  PRINT
+//  PRINT  (same window, direct print dialog)
 // ============================================================
-printBtn.addEventListener('click',()=>{
-  const w=window.open('','_blank');
-  w.document.write(`<html><head><title>Spottix Cards</title><style>
-    body{margin:0;padding:10px;background:#fff}
-    .page{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-start}
-    canvas{border-radius:50%}
-    @media print{body{padding:0}canvas{page-break-inside:avoid}}
-  </style></head><body><div class="page">`);
-  generatedCanvases.forEach(c=>w.document.write(c.outerHTML));
-  w.document.write('</div></body></html>');
+printBtn.addEventListener('click', () => {
+  if (!generatedCanvases.length) return;
+  const dataURLs = generatedCanvases.map(c => c.toDataURL('image/png'));
+  const CARD_MM = 60;
+
+  let imgTags = dataURLs.map(url =>
+    `<img src="${url}" style="width:${CARD_MM}mm;height:${CARD_MM}mm;border-radius:50%;display:block;margin:2mm;border:2px solid #ccc;">`
+  ).join('');
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Spottix Print</title>
+  <style>
+    @page{size:A4 portrait;margin:8mm}
+    body{margin:0;background:#fff}
+    .grid{display:flex;flex-wrap:wrap;gap:4mm;padding:0}
+    img{flex-shrink:0;box-sizing:border-box;page-break-inside:avoid}
+  </style></head><body>
+  <div class="grid">${imgTags}</div>
+  </body></html>`;
+
+  const w = window.open('', '_blank');
+  if (!w) { alert('Pop-up blokkolva! Engedélyezd a pop-upokat.'); return; }
+  w.document.write(html);
   w.document.close();
-  w.onload=()=>w.print();
+  w.onload = () => w.print();
 });
 
 // init
