@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SipZone — Printable Game Maker</title>
+<link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+/* ===================== BASE ===================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --c1: #FF4757;   /* red */
+  --c2: #FFA502;   /* orange */
+  --c3: #2ED573;   /* green */
+  --c4: #1E90FF;   /* blue */
+  --c5: #A29BFE;   /* purple */
+  --c6: #FD79A8;   /* pink */
+  --dark: #2d2d2d;
+  --ink: #1a1a2e;
+  --paper: #fffdf7;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: #1a1a2e;
+  color: #fff;
+  min-height: 100vh;
+}
+
+/* ===================== EDITOR UI (screen only) ===================== */
+@media screen {
+  .editor-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px 20px 40px;
+  }
+  .editor-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .editor-header h1 {
+    font-family: 'Boogaloo', cursive;
+    font-size: 36px;
+    background: linear-gradient(135deg, var(--c1), var(--c2), var(--c6));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .editor-header p { font-size: 14px; color: #aaa; }
+
+  .tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .tab {
+    padding: 8px 18px;
+    border-radius: 30px;
+    border: 2px solid rgba(255,255,255,.15);
+    background: transparent;
+    color: #ccc;
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .tab.active {
+    background: var(--c1);
+    border-color: var(--c1);
+    color: #fff;
+  }
+  .tab:hover:not(.active) { border-color: rgba(255,255,255,.4); color: #fff; }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* settings panel */
+  .settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .setting-card {
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .setting-card label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: #aaa;
+    margin-bottom: 8px;
+  }
+  .setting-card input[type=text],
+  .setting-card select {
+    width: 100%;
+    background: rgba(255,255,255,.1);
+    border: 1.5px solid rgba(255,255,255,.15);
+    border-radius: 8px;
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 8px 12px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .setting-card input:focus,
+  .setting-card select:focus { border-color: var(--c2); }
+  .setting-card select option { background: #2d2d4e; }
+
+  /* color chips */
+  .color-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    cursor: pointer;
+    transition: transform .15s;
+  }
+  .chip.selected { border-color: #fff; transform: scale(1.2); }
+
+  /* cards editor */
+  .cards-editor { display: flex; flex-direction: column; gap: 8px; }
+  .card-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    background: rgba(255,255,255,.06);
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+  .card-row select {
+    padding: 6px 8px;
+    border-radius: 7px;
+    border: 1.5px solid rgba(255,255,255,.15);
+    background: rgba(255,255,255,.1);
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+    width: 120px;
+    outline: none;
+  }
+  .card-row select option { background: #2d2d4e; }
+  .card-row input {
+    flex: 1;
+    background: rgba(255,255,255,.1);
+    border: 1.5px solid rgba(255,255,255,.12);
+    border-radius: 7px;
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    padding: 7px 10px;
+    outline: none;
+  }
+  .card-row input:focus { border-color: var(--c2); }
+  .rm-btn {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,.35);
+    cursor: pointer;
+    font-size: 18px;
+    padding: 0 4px;
+    line-height: 1;
+    transition: color .15s;
+    flex-shrink: 0;
+  }
+  .rm-btn:hover { color: var(--c1); }
+
+  .add-card-btn {
+    margin-top: 8px;
+    padding: 10px;
+    background: rgba(255,255,255,.06);
+    border: 2px dashed rgba(255,255,255,.2);
+    border-radius: 10px;
+    color: #aaa;
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .2s;
+    width: 100%;
+  }
+  .add-card-btn:hover { border-color: var(--c2); color: var(--c2); }
+
+  /* print buttons */
+  .print-bar {
+    position: sticky;
+    bottom: 0;
+    background: rgba(26,26,46,.95);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(255,255,255,.1);
+    padding: 14px 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+  .btn-print {
+    padding: 12px 28px;
+    border-radius: 10px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px;
+    font-weight: 900;
+    cursor: pointer;
+    border: none;
+    transition: transform .1s, opacity .15s;
+  }
+  .btn-print:active { transform: scale(.96); }
+  .btn-board { background: var(--c2); color: #1a1a2e; }
+  .btn-cards { background: var(--c1); color: #fff; }
+  .btn-rules { background: var(--c3); color: #1a1a2e; }
+  .btn-board:hover { opacity: .9; }
+  .btn-cards:hover { opacity: .9; }
+  .btn-rules:hover { opacity: .9; }
+
+  /* preview note */
+  .preview-note {
+    font-size: 13px;
+    color: #888;
+    text-align: center;
+    padding: 12px;
+    background: rgba(255,255,255,.04);
+    border-radius: 10px;
+    margin-top: 16px;
+  }
+  .preview-note strong { color: #ccc; }
+}
+
+/* ===================== PRINTABLE PAGES ===================== */
+.print-pages { display: none; }
+
+@media print {
+  body { background: #fff !important; color: #000 !important; }
+  .editor-wrap { display: none !important; }
+  .print-bar { display: none !important; }
+  .print-pages { display: block !important; }
+}
+
+/* --- Shared print styles --- */
+.print-page {
+  width: 210mm;
+  min-height: 297mm;
+  background: var(--paper);
+  page-break-after: always;
+  position: relative;
+  overflow: hidden;
+  font-family: 'Nunito', sans-serif;
+}
+.print-page:last-child { page-break-after: auto; }
+
+/* ======= BOARD PAGE ======= */
+.board-page { padding: 10mm; }
+
+.board-title-area {
+  text-align: center;
+  margin-bottom: 6mm;
+}
+.board-game-title {
+  font-family: 'Boogaloo', cursive;
+  font-size: 42pt;
+  line-height: 1;
+  letter-spacing: 2px;
+}
+.board-tagline {
+  font-size: 10pt;
+  font-weight: 700;
+  color: #666;
+  margin-top: 2mm;
+  letter-spacing: .05em;
+}
+
+/* The board grid — Monopoly-style outer ring */
+.board-grid {
+  display: grid;
+  grid-template-columns: 22mm repeat(9, 1fr) 22mm;
+  grid-template-rows: 22mm repeat(7, 1fr) 22mm;
+  width: 190mm;
+  height: 230mm;
+  border: 3px solid var(--ink);
+  border-radius: 4mm;
+  overflow: hidden;
+}
+
+/* Corner spaces */
+.corner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 7pt;
+  font-weight: 900;
+  text-align: center;
+  padding: 2mm;
+  border: 1px solid var(--ink);
+}
+.corner-start { background: #e8f8e8; color: #1b5e20; }
+.corner-finish { background: #fff3e0; color: #bf360c; }
+.corner-dare   { background: #fce4ec; color: #880e4f; }
+.corner-safe   { background: #e8eaf6; color: #1a237e; }
+
+.corner .big-icon { font-size: 22pt; line-height: 1; margin-bottom: 1mm; }
+.corner .corner-label { font-size: 7.5pt; font-weight: 900; line-height: 1.2; }
+
+/* Edge spaces (top/bottom/left/right) */
+.edge-space {
+  border: 1px solid var(--ink);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1mm;
+  text-align: center;
+  position: relative;
+}
+/* top/bottom rotate text */
+.edge-top .space-label,
+.edge-bottom .space-label {
+  font-size: 6pt;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.edge-left .space-label,
+.edge-right .space-label {
+  font-size: 6pt;
+  font-weight: 700;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  line-height: 1.2;
+}
+.edge-left { transform: none; }
+.edge-right .space-label { transform: rotate(180deg); }
+
+.space-icon { font-size: 13pt; line-height: 1; margin-bottom: 0.5mm; }
+.space-num  { font-size: 6pt; color: #aaa; position: absolute; top: 1mm; left: 1.5mm; font-weight: 400; }
+
+/* Space type colors */
+.type-sip1  { background: #e3f2fd; }
+.type-sip2  { background: #fce4ec; }
+.type-sip3  { background: #fff9c4; }
+.type-card  { background: #f3e5f5; }
+.type-safe  { background: #e8f5e8; }
+.type-dare  { background: #fbe9e7; }
+.type-vote  { background: #e8eaf6; }
+.type-rule  { background: #fff3e0; }
+.type-skip  { background: #f5f5f5; }
+
+/* Center area */
+.board-center {
+  grid-column: 2 / 11;
+  grid-row: 2 / 9;
+  border: 1px solid var(--ink);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4mm;
+  background: var(--paper);
+  position: relative;
+}
+.center-big-title {
+  font-family: 'Boogaloo', cursive;
+  font-size: 30pt;
+  line-height: 1;
+  letter-spacing: 2px;
+  text-align: center;
+  margin-bottom: 3mm;
+}
+.center-subtitle {
+  font-size: 8pt;
+  color: #666;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-align: center;
+  margin-bottom: 5mm;
+}
+
+/* Mini legend in center */
+.legend-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2mm 6mm;
+  width: 100%;
+  max-width: 80mm;
+}
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 2mm;
+  font-size: 7pt;
+  font-weight: 700;
+}
+.legend-dot {
+  width: 5mm; height: 5mm;
+  border-radius: 1mm;
+  flex-shrink: 0;
+  border: 1px solid rgba(0,0,0,.15);
+}
+
+/* Mini dice diagram in center */
+.center-dice-note {
+  margin-top: 5mm;
+  font-size: 7pt;
+  color: #888;
+  text-align: center;
+  line-height: 1.6;
+  border-top: 1px dashed #ccc;
+  padding-top: 4mm;
+}
+
+/* Decorative confetti dots in center */
+.confetti-dot {
+  position: absolute;
+  border-radius: 50%;
+  opacity: .12;
+  pointer-events: none;
+}
+
+/* ======= CARDS PAGES ======= */
+.cards-page { padding: 8mm; }
+.cards-page-title {
+  font-family: 'Boogaloo', cursive;
+  font-size: 16pt;
+  margin-bottom: 5mm;
+  color: var(--ink);
+  text-align: center;
+  letter-spacing: 1px;
+}
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4mm;
+}
+.game-card {
+  border-radius: 4mm;
+  padding: 4mm 4.5mm;
+  min-height: 38mm;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1.5px solid rgba(0,0,0,.12);
+  position: relative;
+  overflow: hidden;
+  page-break-inside: avoid;
+}
+.game-card::before {
+  content: '';
+  position: absolute;
+  top: -6mm; right: -6mm;
+  width: 20mm; height: 20mm;
+  border-radius: 50%;
+  background: rgba(255,255,255,.25);
+}
+.gc-cat {
+  font-size: 6.5pt;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  opacity: .75;
+  margin-bottom: 2mm;
+}
+.gc-text {
+  font-size: 8pt;
+  font-weight: 700;
+  line-height: 1.4;
+  flex: 1;
+}
+.gc-title {
+  font-family: 'Boogaloo', cursive;
+  font-size: 9pt;
+  text-align: right;
+  opacity: .5;
+  margin-top: 2mm;
+}
+/* card colors by category */
+.gc-challenge { background: #fce4ec; color: #880e4f; }
+.gc-vote      { background: #e8eaf6; color: #1a237e; }
+.gc-truth     { background: #e3f2fd; color: #1565c0; }
+.gc-rule      { background: #fff3e0; color: #e65100; }
+.gc-group     { background: #e8f5e8; color: #1b5e20; }
+.gc-dare      { background: #fbe9e7; color: #bf360c; }
+
+/* ======= RULES PAGE ======= */
+.rules-page { padding: 12mm 14mm; }
+.rules-header {
+  text-align: center;
+  margin-bottom: 8mm;
+  padding-bottom: 5mm;
+  border-bottom: 2px solid var(--ink);
+}
+.rules-header h2 {
+  font-family: 'Boogaloo', cursive;
+  font-size: 28pt;
+  letter-spacing: 2px;
+}
+.rules-header p { font-size: 9pt; color: #555; margin-top: 2mm; }
+.rules-section { margin-bottom: 7mm; }
+.rules-section h3 {
+  font-size: 10pt;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-bottom: 3mm;
+  padding: 2mm 3mm;
+  border-radius: 2mm;
+  display: inline-block;
+}
+.rules-section p, .rules-section li {
+  font-size: 8.5pt;
+  line-height: 1.65;
+  color: #333;
+}
+.rules-section ul { padding-left: 5mm; }
+.rules-section li { margin-bottom: 1mm; }
+.space-legend-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2mm 8mm;
+  margin-top: 3mm;
+}
+.space-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 2.5mm;
+  font-size: 8pt;
+}
+.sl-dot {
+  width: 6mm; height: 6mm;
+  border-radius: 1.5mm;
+  flex-shrink: 0;
+  border: 1px solid rgba(0,0,0,.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8pt;
+}
+.rules-footer {
+  position: absolute;
+  bottom: 8mm;
+  left: 14mm;
+  right: 14mm;
+  text-align: center;
+  font-size: 7.5pt;
+  color: #999;
+  border-top: 1px dashed #ddd;
+  padding-top: 3mm;
+}
+</style>
+</head>
+<body>
+
+<!-- ===================== EDITOR UI ===================== -->
+<div class="editor-wrap">
+  <div class="editor-header">
+    <div>
+      <h1>🎮 SipZone Maker</h1>
+      <p>Szerkeszd meg, aztán nyomtasd ki — kész a saját ivós társasjátékod!</p>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('settings')">⚙️ Beállítások</button>
+    <button class="tab" onclick="switchTab('cards')">🃏 Kártyák</button>
+    <button class="tab" onclick="switchTab('spaces')">🗺️ Mezők</button>
+    <button class="tab" onclick="switchTab('preview')">👁️ Előnézet</button>
+  </div>
+
+  <!-- SETTINGS TAB -->
+  <div id="tab-settings" class="tab-panel active">
+    <div class="settings-grid">
+      <div class="setting-card">
+        <label>Játék neve</label>
+        <input type="text" id="gameTitle" value="SipZone" oninput="updateAll()">
+      </div>
+      <div class="setting-card">
+        <label>Alcím / Tagline</label>
+        <input type="text" id="gameTagline" value="The Ultimate Drinking Board Game" oninput="updateAll()">
+      </div>
+      <div class="setting-card">
+        <label>Nyelv / Language</label>
+        <select id="gameLang" onchange="updateAll()">
+          <option value="hu">🇭🇺 Magyar</option>
+          <option value="en" selected>🇬🇧 English</option>
+        </select>
+      </div>
+      <div class="setting-card">
+        <label>Alcím a középső táblán (pl. "Dani Születésnapjára 🎂")</label>
+        <input type="text" id="centerNote" value="" placeholder="Opcionális felirat..." oninput="updateAll()">
+      </div>
+      <div class="setting-card">
+        <label>Cím színe</label>
+        <div class="color-chips" id="colorChips">
+          <div class="chip selected" style="background:#FF4757" data-color="#FF4757" onclick="pickColor(this)"></div>
+          <div class="chip" style="background:#FFA502" data-color="#FFA502" onclick="pickColor(this)"></div>
+          <div class="chip" style="background:#2ED573" data-color="#2ED573" onclick="pickColor(this)"></div>
+          <div class="chip" style="background:#1E90FF" data-color="#1E90FF" onclick="pickColor(this)"></div>
+          <div class="chip" style="background:#A29BFE" data-color="#A29BFE" onclick="pickColor(this)"></div>
+          <div class="chip" style="background:#FD79A8" data-color="#FD79A8" onclick="pickColor(this)"></div>
+          <div class="chip" style="background:#2d2d2d" data-color="#2d2d2d" onclick="pickColor(this)"></div>
+        </div>
+      </div>
+    </div>
+    <div class="preview-note">
+      💡 <strong>Tipp:</strong> Miután beállítottad a nevet és a kártyákat, kattints a lenti gombokra a nyomtatáshoz. A böngésző nyomtatási képernyőjén válaszd az <strong>„A4 / Portré"</strong> formátumot.
+    </div>
+  </div>
+
+  <!-- CARDS TAB -->
+  <div id="tab-cards" class="tab-panel">
+    <p style="font-size:13px;color:#aaa;margin-bottom:14px;">Szerkeszd, töröld vagy add hozzá saját kártyáidat. A kategória meghatározza a kártya színét.</p>
+    <div class="cards-editor" id="cardsEditor"></div>
+    <button class="add-card-btn" onclick="addCard()">+ Új kártya hozzáadása</button>
+  </div>
+
+  <!-- SPACES TAB -->
+  <div id="tab-spaces" class="tab-panel">
+    <p style="font-size:13px;color:#aaa;margin-bottom:14px;">A tábla 36 mezőből áll (4 sarok + 32 él). Az él mezők szövegét itt módosíthatod.</p>
+    <div id="spacesEditor" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;"></div>
+  </div>
+
+  <!-- PREVIEW TAB -->
+  <div id="tab-preview" class="tab-panel">
+    <div class="preview-note" style="margin-bottom:16px;">
+      Az alábbi gombokkal nyomtathatod ki a különböző lapokat. Minden gomb egy külön nyomtatási ablakot nyit.
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;">
+      <div style="background:rgba(255,255,255,.07);border-radius:12px;padding:16px;border:1px solid rgba(255,255,255,.12)">
+        <div style="font-size:24px;margin-bottom:8px">🗺️</div>
+        <div style="font-weight:900;font-size:14px;margin-bottom:4px">Játéktábla</div>
+        <div style="font-size:12px;color:#aaa;margin-bottom:12px">1 A4-es lap (álló) — nyomtasd ki és hajtsd össze ha kell</div>
+        <button class="btn-print btn-board" onclick="printBoard()" style="width:100%;padding:10px">🖨️ Tábla nyomtatása</button>
+      </div>
+      <div style="background:rgba(255,255,255,.07);border-radius:12px;padding:16px;border:1px solid rgba(255,255,255,.12)">
+        <div style="font-size:24px;margin-bottom:8px">🃏</div>
+        <div style="font-weight:900;font-size:14px;margin-bottom:4px">Kártyák</div>
+        <div style="font-size:12px;color:#aaa;margin-bottom:12px">Több A4-es lap — vágd ki és használd a játékhoz</div>
+        <button class="btn-print btn-cards" onclick="printCards()" style="width:100%;padding:10px">🖨️ Kártyák nyomtatása</button>
+      </div>
+      <div style="background:rgba(255,255,255,.07);border-radius:12px;padding:16px;border:1px solid rgba(255,255,255,.12)">
+        <div style="font-size:24px;margin-bottom:8px">📋</div>
+        <div style="font-weight:900;font-size:14px;margin-bottom:4px">Szabályok</div>
+        <div style="font-size:12px;color:#aaa;margin-bottom:12px">1 A4-es lap — magyarázza el a játékot</div>
+        <button class="btn-print btn-rules" onclick="printRules()" style="width:100%;padding:10px">🖨️ Szabályok nyomtatása</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Print bar always visible on screen -->
+<div class="print-bar">
+  <span style="font-size:13px;color:#aaa;align-self:center">Nyomtatás:</span>
+  <button class="btn-print btn-board" onclick="printBoard()">🗺️ Tábla</button>
+  <button class="btn-print btn-cards" onclick="printCards()">🃏 Kártyák</button>
+  <button class="btn-print btn-rules" onclick="printRules()">📋 Szabályok</button>
+</div>
+
+<!-- ===================== PRINTABLE CONTENT ===================== -->
+<div class="print-pages" id="printPages"></div>
+
+<script>
+// ============================================================
+//  DATA
+// ============================================================
+let titleColor = '#FF4757';
+
+const LANGS = {
+  hu: {
+    cards_page_title: 'Kártyák — Vágd ki és keverd össze!',
+    rules_title: 'Szabályok',
+    rules_subtitle: 'Olvasd el mielőtt elkezdetek játszani!',
+    start: 'START\n🏁',
+    finish: 'VÉGE\n🏆\nMindenki iszik!',
+    dare_corner: 'MERJ!\n🔥',
+    safe_corner: 'MENTES\n🛡️',
+    sip1: '1 Korty',
+    sip2: '2 Korty',
+    sip3: '3 Korty',
+    card: 'Húzz lapot!',
+    safe: 'Mentes mező',
+    dare: 'Merj!',
+    vote: 'Szavazás',
+    rule: 'Szabály!',
+    skip: 'Kimaradsz',
+    legend: [
+      ['#e3f2fd','1 korty — igyál egyet'],
+      ['#fce4ec','2 korty — igyál kettőt'],
+      ['#fff9c4','3 korty — igyál hármat'],
+      ['#f3e5f5','Kártyahúzás — húzz egy lapot'],
+      ['#e8f5e8','Mentes — nem kell inni'],
+      ['#fbe9e7','Merj! — teljesíts feladatot'],
+      ['#e8eaf6','Szavazás — ki mit csinál?'],
+      ['#fff3e0','Új szabály — mindenki betartja'],
+    ],
+    rules: {
+      goal: {
+        title: 'A játék célja',
+        color: '#e3f2fd',
+        body: 'Körbe járjátok a táblát kockadobással. Aki a VÉGE mezőre ér, mindenki iszik egyet, majd a játék folytatódik amíg meg nem untjátok. Nincs igazi vesztes — mindenki itat!'
+      },
+      setup: {
+        title: 'Előkészítés',
+        color: '#e8f5e8',
+        items: [
+          'Keverjétek össze a kártyákat és tegyétek a tábla mellé',
+          'Mindenki helyezze a bábuját a START mezőre',
+          'A legfiatalabb játékos kezd (vagy dobjatok a sorrendért)',
+          'Legyen mindenki előtt ital — felelősen!'
+        ]
+      },
+      turn: {
+        title: 'Egy kör menete',
+        color: '#f3e5f5',
+        items: [
+          'Dobd a kockát (1 kocka, 1–6)',
+          'Lépj annyit amennyit dobtál',
+          'Hajtsd végre, amit a mező ír',
+          'A következő játékos jön'
+        ]
+      },
+      spaces: {
+        title: 'Mezők magyarázata',
+        color: '#fff9c4',
+      },
+      cards: {
+        title: 'Kártyák',
+        color: '#fbe9e7',
+        body: 'Ha "Húzz lapot!" mezőre lépsz, vegyél le egyet a pakliból és hajtsd végre. Ha nem akarod teljesíteni, iszol 3 kortyot helyette. A "Merj!" mezőn a bal oldalad ülő játékos ad neked feladatot — ha nem teljesíted, 2 korty.'
+      }
+    },
+    cats: {challenge:'Kihívás',vote:'Szavazás',truth:'Igaz/Hazug',rule:'Szabály',group:'Csoportos',dare:'Merj!'}
+  },
+  en: {
+    cards_page_title: 'Cards — Cut out and shuffle!',
+    rules_title: 'Rules',
+    rules_subtitle: 'Read this before you start playing!',
+    start: 'START\n🏁',
+    finish: 'FINISH\n🏆\nEveryone drinks!',
+    dare_corner: 'DARE!\n🔥',
+    safe_corner: 'SAFE\n🛡️',
+    sip1: '1 Sip',
+    sip2: '2 Sips',
+    sip3: '3 Sips',
+    card: 'Draw a card!',
+    safe: 'Safe space',
+    dare: 'Dare!',
+    vote: 'Vote',
+    rule: 'New rule!',
+    skip: 'Skip turn',
+    legend: [
+      ['#e3f2fd','1 sip — take one sip'],
+      ['#fce4ec','2 sips — take two sips'],
+      ['#fff9c4','3 sips — take three sips'],
+      ['#f3e5f5','Draw a card from the deck'],
+      ['#e8f5e8','Safe — no drinking!'],
+      ['#fbe9e7','Dare! — complete a challenge'],
+      ['#e8eaf6','Vote — group decides'],
+      ['#fff3e0','New rule — everyone follows it'],
+    ],
+    rules: {
+      goal: {
+        title: 'Objective',
+        color: '#e3f2fd',
+        body: 'Go around the board by rolling the dice. When someone lands on FINISH, everyone drinks once and the game continues until you decide to stop. There are no real losers — everyone just drinks!'
+      },
+      setup: {
+        title: 'Setup',
+        color: '#e8f5e8',
+        items: [
+          'Shuffle the cards and place them face-down next to the board',
+          'Everyone places their token on START',
+          'The youngest player goes first (or roll for it)',
+          'Make sure everyone has a drink — be responsible!'
+        ]
+      },
+      turn: {
+        title: 'A turn',
+        color: '#f3e5f5',
+        items: [
+          'Roll the die (1 die, 1–6)',
+          'Move your token that many spaces forward',
+          'Follow the instruction on the space you land on',
+          'Pass the die to the next player'
+        ]
+      },
+      spaces: {
+        title: 'Space guide',
+        color: '#fff9c4',
+      },
+      cards: {
+        title: 'Cards',
+        color: '#fbe9e7',
+        body: 'When you land on "Draw a card!", take one from the pile and do what it says. If you refuse, take 3 sips instead. On a "Dare!" space, the player to your left gives you a challenge — refuse and take 2 sips.'
+      }
+    },
+    cats: {challenge:'Challenge',vote:'Vote',truth:'Truth/Lie',rule:'Rule',group:'Group',dare:'Dare!'}
+  }
+};
+
+const defaultCards = {
+  en: [
+    {cat:'challenge', text:"Finish the sentence: 'When I'm drunk I always...'"},
+    {cat:'challenge', text:'Imitate the person to your left for 30 seconds!'},
+    {cat:'challenge', text:"Tell your best joke. If nobody laughs, take 2 sips."},
+    {cat:'challenge', text:'Dance for 15 seconds without music. Stop = 2 sips.'},
+    {cat:'challenge', text:"Reveal the last person you called. Embarrassing = 1 sip."},
+    {cat:'challenge', text:'Say the alphabet backwards. Fail = 2 sips.'},
+    {cat:'challenge', text:"Do your best impression of another player. They vote if it's good."},
+    {cat:'vote',      text:'Vote: who would drink the most tonight? That person drinks 3!'},
+    {cat:'vote',      text:"Vote: who's the worst liar? That person says something — others vote."},
+    {cat:'vote',      text:"Vote: who has the best dance moves? Loser drinks."},
+    {cat:'vote',      text:"Vote: who's most likely to text their ex tonight? 2 sips."},
+    {cat:'truth',     text:"True or Lie: 'I have never cheated on a test.' Wrong = drink."},
+    {cat:'truth',     text:"True or Lie: 'I love Mondays.' Everyone votes, loser drinks."},
+    {cat:'truth',     text:"Share your most recent embarrassing moment. Skip = 2 sips."},
+    {cat:'rule',      text:"New rule: no one can use their phone. Violators drink."},
+    {cat:'rule',      text:"New rule: everyone must speak in an accent. Forget = drink."},
+    {cat:'rule',      text:"New rule: you can't say 'drink' or 'sip'. Slip up = drink."},
+    {cat:'group',     text:"Everyone with brown hair takes a sip!"},
+    {cat:'group',     text:"Everyone who ate fast food this week drinks twice!"},
+    {cat:'group',     text:"Everyone who has a pet takes a sip!"},
+    {cat:'group',     text:"If you've been to more than 3 countries, take a sip!"},
+    {cat:'dare',      text:"Let the group pick someone to give you a dare. No refusals!"},
+    {cat:'dare',      text:"Call someone and say 'I have something important to tell you' then hang up."},
+    {cat:'dare',      text:"Post a selfie on your story with the caption the group chooses."},
+  ],
+  hu: [
+    {cat:'challenge', text:"Fejezd be: 'Ha részeg lennék, akkor...'"},
+    {cat:'challenge', text:'Utánozd a bal oldaladon ülőt 30 másodpercig!'},
+    {cat:'challenge', text:"Mondd el a legjobb viccet. Ha nem nevet senki, 2 korty."},
+    {cat:'challenge', text:'Táncolj 15 másodpercig zene nélkül. Megállsz = 2 korty.'},
+    {cat:'challenge', text:"Mondd az ábécét visszafelé. Hibázol = 2 korty."},
+    {cat:'challenge', text:'Csináld le az aktuális trendtáncot. Nem tudod = 2 korty.'},
+    {cat:'challenge', text:"Utánozd valamelyik játékos hangját. Ők szavaznak, jó volt-e."},
+    {cat:'vote',      text:'Szavazzatok: ki innánk a legtöbbet ezen az estén? Az illető iszik 3-at!'},
+    {cat:'vote',      text:"Szavazzatok: ki a legjobb táncos? A vesztes iszik."},
+    {cat:'vote',      text:"Szavazzatok: ki a legvalószínűbb, hogy ma éjjel üzenet az exének? 2 korty."},
+    {cat:'truth',     text:"Igaz vagy Hazug: 'Soha nem puskáztam dolgozaton.' Hazug = iszol."},
+    {cat:'truth',     text:"Igaz vagy Hazug: 'Imádom a hétfőket.' Mindenki szavaz, vesztes iszik."},
+    {cat:'truth',     text:"Oszd meg a legutóbbi kínos pillanatomat. Nem mondod = 2 korty."},
+    {cat:'rule',      text:"Új szabály: tilos a telefon használata. Aki nyúl hozzá, iszik."},
+    {cat:'rule',      text:"Új szabály: mindenki akcentussal beszél. Elfelejti = iszik."},
+    {cat:'rule',      text:"Új szabály: nem lehet mondani 'iszik' szót. Kimondja = iszik."},
+    {cat:'group',     text:"Mindenki, akinek barna a haja, iszik egyet!"},
+    {cat:'group',     text:"Mindenki, aki ezen a héten evett gyorséttermi kaját, iszik kettőt!"},
+    {cat:'group',     text:"Mindenki, akinek van kisállata, iszik egyet!"},
+    {cat:'group',     text:"Ha több mint 3 országban jártál, igyál egyet!"},
+    {cat:'dare',      text:"A csoport választ neked egy feladatot. Nem teljesítheted vissza."},
+    {cat:'dare',      text:"Hívj fel valakit és mondd: 'Van valami fontos mondanivalóm' — aztán tedd le."},
+    {cat:'dare',      text:"Tegyél ki sztorit azzal a felirattal, amit a csoport kitalál."},
+  ]
+};
+
+// Board spaces (edge, clockwise: top-left→top-right→right-down→bottom-right→bottom-left→left-up)
+// 9 top + 7 right + 9 bottom + 7 left = 32 edge + 4 corners = 36 total
+const defaultSpaces = {
+  top:    ['sip1','card','sip2','sip1','dare','sip1','vote','sip2','rule'],
+  right:  ['sip1','sip3','card','sip2','sip1','dare','vote'],
+  bottom: ['rule','sip2','sip1','card','sip1','dare','sip1','sip2','vote'],
+  left:   ['sip1','card','sip2','vote','sip1','dare','sip1'],
+};
+
+let spaces = JSON.parse(JSON.stringify(defaultSpaces));
+let cards = [];
+
+function getLang() { return document.getElementById('gameLang')?.value || 'en'; }
+function getTitle() { return document.getElementById('gameTitle')?.value || 'SipZone'; }
+function getTagline() { return document.getElementById('gameTagline')?.value || 'The Ultimate Drinking Board Game'; }
+function getCenterNote() { return document.getElementById('centerNote')?.value || ''; }
+
+// ============================================================
+//  INIT
+// ============================================================
+window.onload = () => {
+  cards = defaultCards['en'].map(c => ({...c}));
+  renderCardsEditor();
+  renderSpacesEditor();
+  updateAll();
+};
+
+function updateAll() {
+  const lang = getLang();
+  if (cards.length === 0 || (cards[0] && cards[0]._lang !== lang)) {
+    // Language switched — reload defaults? Only if not user-edited
+  }
+  renderCardsEditor();
+  renderSpacesEditor();
+}
+
+// ============================================================
+//  COLOR PICKER
+// ============================================================
+function pickColor(el) {
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  titleColor = el.dataset.color;
+}
+
+// ============================================================
+//  TABS
+// ============================================================
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+// ============================================================
+//  CARDS EDITOR
+// ============================================================
+function renderCardsEditor() {
+  const lang = getLang();
+  const t = LANGS[lang];
+  const el = document.getElementById('cardsEditor');
+  el.innerHTML = '';
+  cards.forEach((c, i) => {
+    const row = document.createElement('div');
+    row.className = 'card-row';
+    const opts = Object.entries(t.cats).map(([k,v]) =>
+      `<option value="${k}"${c.cat===k?' selected':''}>${v}</option>`).join('');
+    row.innerHTML = `
+      <select onchange="cards[${i}].cat=this.value">${opts}</select>
+      <input value="${c.text.replace(/"/g,'&quot;')}" oninput="cards[${i}].text=this.value" placeholder="Kártya szövege...">
+      <button class="rm-btn" onclick="removeCard(${i})">×</button>
+    `;
+    el.appendChild(row);
+  });
+}
+
+function addCard() {
+  const lang = getLang();
+  cards.push({cat: 'challenge', text: ''});
+  renderCardsEditor();
+  setTimeout(() => {
+    const inputs = document.querySelectorAll('.card-row input');
+    if (inputs.length) inputs[inputs.length-1].focus();
+  }, 50);
+}
+
+function removeCard(i) {
+  cards.splice(i, 1);
+  renderCardsEditor();
+}
+
+// ============================================================
+//  SPACES EDITOR
+// ============================================================
+function renderSpacesEditor() {
+  const lang = getLang();
+  const t = LANGS[lang];
+  const el = document.getElementById('spacesEditor');
+  el.innerHTML = '';
+  const sideLabels = {top:'Felső sor',right:'Jobb sor',bottom:'Alsó sor',left:'Bal sor'};
+  const types = ['sip1','sip2','sip3','card','safe','dare','vote','rule','skip'];
+  ['top','right','bottom','left'].forEach(side => {
+    const sect = document.createElement('div');
+    sect.style.cssText = 'background:rgba(255,255,255,.06);border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,.1)';
+    sect.innerHTML = `<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#aaa;margin-bottom:10px">${sideLabels[side]}</div>`;
+    spaces[side].forEach((type, i) => {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;gap:6px;align-items:center;margin-bottom:6px';
+      const numEl = document.createElement('span');
+      numEl.style.cssText = 'font-size:11px;color:#666;min-width:16px';
+      numEl.textContent = i+1;
+      const sel = document.createElement('select');
+      sel.style.cssText = 'flex:1;padding:5px 8px;border-radius:6px;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.1);color:#fff;font-family:Nunito,sans-serif;font-size:12px;outline:none';
+      types.forEach(ty => {
+        const opt = document.createElement('option');
+        opt.value = ty;
+        opt.textContent = t[ty] || ty;
+        if (ty === type) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      sel.onchange = () => { spaces[side][i] = sel.value; };
+      row.appendChild(numEl);
+      row.appendChild(sel);
+      sect.appendChild(row);
+    });
+    el.appendChild(sect);
+  });
+}
+
+// ============================================================
+//  BUILD HTML FOR PRINTING
+// ============================================================
+function buildBoardHTML() {
+  const lang = getLang();
+  const t = LANGS[lang];
+  const title = getTitle();
+  const tagline = getTagline();
+  const centerNote = getCenterNote();
+  const tc = titleColor;
+
+  const spaceTypeInfo = {
+    sip1:  {cls:'type-sip1',  icon:'🍺', label: t.sip1},
+    sip2:  {cls:'type-sip2',  icon:'🍻', label: t.sip2},
+    sip3:  {cls:'type-sip3',  icon:'🥴', label: t.sip3},
+    card:  {cls:'type-card',  icon:'🃏', label: t.card},
+    safe:  {cls:'type-safe',  icon:'🛡️', label: t.safe},
+    dare:  {cls:'type-dare',  icon:'🔥', label: t.dare},
+    vote:  {cls:'type-vote',  icon:'🗳️', label: t.vote},
+    rule:  {cls:'type-rule',  icon:'📜', label: t.rule},
+    skip:  {cls:'type-skip',  icon:'💤', label: t.skip},
+  };
+
+  function edgeCell(type, num, side) {
+    const info = spaceTypeInfo[type] || {cls:'type-sip1', icon:'🍺', label: type};
+    return `<div class="edge-space edge-${side} ${info.cls}">
+      <span class="space-num">${num}</span>
+      <span class="space-icon">${info.icon}</span>
+      <span class="space-label">${info.label}</span>
+    </div>`;
+  }
+
+  // top row: 9 spaces (indices 1-9), left→right
+  let topCells = '';
+  spaces.top.forEach((type, i) => { topCells += edgeCell(type, i+1, 'top'); });
+
+  // right col: 7 spaces (indices 10-16), top→bottom
+  let rightCells = '';
+  spaces.right.forEach((type, i) => { rightCells += edgeCell(type, spaces.top.length+i+1, 'right'); });
+
+  // bottom row: 9 spaces (indices 17-25), right→left
+  let bottomCells = '';
+  [...spaces.bottom].reverse().forEach((type, i) => {
+    bottomCells += edgeCell(type, spaces.top.length + spaces.right.length + i + 1, 'bottom');
+  });
+
+  // left col: 7 spaces (indices 26-32), bottom→top
+  let leftCells = '';
+  [...spaces.left].reverse().forEach((type, i) => {
+    leftCells += edgeCell(type, spaces.top.length + spaces.right.length + spaces.bottom.length + i + 1, 'left');
+  });
+
+  const legendItems = t.legend.map(([color, label]) =>
+    `<div class="legend-row"><div class="legend-dot" style="background:${color}"></div><span>${label}</span></div>`
+  ).join('');
+
+  const cornersStart = t.start.replace(/\n/g, '<br>');
+  const cornersFinish = t.finish.replace(/\n/g, '<br>');
+  const cornersDare = t.dare_corner.replace(/\n/g, '<br>');
+  const cornersSafe = t.safe_corner.replace(/\n/g, '<br>');
+
+  const diceNote = lang === 'hu'
+    ? '1 kocka · 1–6 · Forgalomirány: óramutató járásával megegyező<br>Ha a VÉGE mezőre érsz → mindenki iszik egyet, folytasd a játékot'
+    : '1 die · 1–6 · Move clockwise around the board<br>Landing on FINISH → everyone drinks once, game continues';
+
+  return `
+<div class="print-page board-page">
+  <div class="board-title-area">
+    <div class="board-game-title" style="color:${tc}">${title}</div>
+    <div class="board-tagline">${tagline}</div>
+  </div>
+  <div class="board-grid">
+    <!-- Top-left corner -->
+    <div class="corner corner-start" style="grid-column:1;grid-row:1">
+      <div class="big-icon">🏁</div>
+      <div class="corner-label">${lang==='hu'?'START':'START'}</div>
+    </div>
+    <!-- Top edge -->
+    ${topCells}
+    <!-- Top-right corner -->
+    <div class="corner corner-dare" style="grid-column:11;grid-row:1">
+      <div class="big-icon">🔥</div>
+      <div class="corner-label">${lang==='hu'?'MERJ!':'DARE!'}</div>
+    </div>
+    <!-- Left edge -->
+    ${leftCells}
+    <!-- Center -->
+    <div class="board-center">
+      <div style="position:absolute;top:8mm;left:8mm;width:18mm;height:18mm;border-radius:50%;background:${tc};opacity:.08"></div>
+      <div style="position:absolute;bottom:10mm;right:10mm;width:24mm;height:24mm;border-radius:50%;background:${tc};opacity:.06"></div>
+      <div style="position:absolute;top:20mm;right:6mm;width:10mm;height:10mm;border-radius:50%;background:#FFA502;opacity:.1"></div>
+      <div class="center-big-title" style="color:${tc}">${title}</div>
+      <div class="center-subtitle">${tagline}</div>
+      ${centerNote ? `<div style="font-size:9pt;font-weight:900;color:${tc};margin-bottom:4mm;text-align:center">${centerNote}</div>` : ''}
+      <div class="legend-grid">${legendItems}</div>
+      <div class="center-dice-note">${diceNote}</div>
+    </div>
+    <!-- Right edge -->
+    ${rightCells}
+    <!-- Bottom-left corner -->
+    <div class="corner corner-safe" style="grid-column:1;grid-row:9">
+      <div class="big-icon">🛡️</div>
+      <div class="corner-label">${lang==='hu'?'MENTES':'SAFE'}</div>
+    </div>
+    <!-- Bottom edge -->
+    ${bottomCells}
+    <!-- Bottom-right corner -->
+    <div class="corner corner-finish" style="grid-column:11;grid-row:9">
+      <div class="big-icon">🏆</div>
+      <div class="corner-label">${lang==='hu'?'VÉGE':'FINISH'}</div>
+    </div>
+  </div>
+</div>`;
+}
+
+function buildCardsHTML() {
+  const lang = getLang();
+  const t = LANGS[lang];
+  const title = getTitle();
+  const tc = titleColor;
+  const CARDS_PER_PAGE = 9;
+  const catColors = {
+    challenge:'gc-challenge', vote:'gc-vote', truth:'gc-truth',
+    rule:'gc-rule', group:'gc-group', dare:'gc-dare'
+  };
+  let pages = '';
+  for (let p = 0; p < cards.length; p += CARDS_PER_PAGE) {
+    const chunk = cards.slice(p, p + CARDS_PER_PAGE);
+    const cardEls = chunk.map(c => {
+      const cls = catColors[c.cat] || 'gc-challenge';
+      const catLabel = t.cats[c.cat] || c.cat;
+      return `<div class="game-card ${cls}">
+        <div class="gc-cat">${catLabel}</div>
+        <div class="gc-text">${c.text}</div>
+        <div class="gc-title">${title}</div>
+      </div>`;
+    }).join('');
+    // pad to 9
+    const padded = cardEls + Array(CARDS_PER_PAGE - chunk.length).fill('<div class="game-card" style="border:1.5px dashed #ccc;background:transparent"></div>').join('');
+    pages += `<div class="print-page cards-page">
+      <div class="cards-page-title" style="color:${tc}">${title} — ${t.cards_page_title}</div>
+      <div class="cards-grid">${padded}</div>
+    </div>`;
+  }
+  return pages;
+}
+
+function buildRulesHTML() {
+  const lang = getLang();
+  const t = LANGS[lang];
+  const title = getTitle();
+  const tc = titleColor;
+  const r = t.rules;
+
+  const setupItems = r.setup.items.map(i => `<li>${i}</li>`).join('');
+  const turnItems  = r.turn.items.map(i => `<li>${i}</li>`).join('');
+  const spaceLegend = t.legend.map(([color, label]) =>
+    `<div class="space-legend-row">
+      <div class="sl-dot" style="background:${color}"></div>
+      <span>${label}</span>
+    </div>`).join('');
+
+  return `<div class="print-page rules-page">
+    <div class="rules-header">
+      <h2 style="color:${tc}">${title}</h2>
+      <h2>${r.goal.title}</h2>
+      <p>${t.rules_subtitle}</p>
+    </div>
+    <div class="rules-section">
+      <h3 style="background:${r.goal.color};color:${tc}">${r.goal.title}</h3>
+      <p>${r.goal.body}</p>
+    </div>
+    <div class="rules-section">
+      <h3 style="background:${r.setup.color}">${r.setup.title}</h3>
+      <ul>${setupItems}</ul>
+    </div>
+    <div class="rules-section">
+      <h3 style="background:${r.turn.color}">${r.turn.title}</h3>
+      <ul>${turnItems}</ul>
+    </div>
+    <div class="rules-section">
+      <h3 style="background:${r.spaces.color}">${r.spaces.title}</h3>
+      <div class="space-legend-grid">${spaceLegend}</div>
+    </div>
+    <div class="rules-section">
+      <h3 style="background:${r.cards.color}">${r.cards.title}</h3>
+      <p>${r.cards.body}</p>
+    </div>
+    <div class="rules-footer">${title} — ${t.rules_subtitle} · Made with Realm Forge</div>
+  </div>`;
+}
+
+// ============================================================
+//  PRINT FUNCTIONS
+// ============================================================
+function openPrintWindow(html) {
+  const w = window.open('', '_blank', 'width=900,height=700');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{--c1:#FF4757;--c2:#FFA502;--c3:#2ED573;--c4:#1E90FF;--c5:#A29BFE;--c6:#FD79A8;--dark:#2d2d2d;--ink:#1a1a2e;--paper:#fffdf7}
+    body{background:#eee;padding:10px;font-family:'Nunito',sans-serif}
+    ${document.querySelector('style').textContent}
+    .print-page{margin:0 auto 20px;box-shadow:0 4px 24px rgba(0,0,0,.18)}
+    @media print{body{background:#fff;padding:0}.print-page{box-shadow:none;margin:0}}
+  </style>
+  </head><body>${html}
+  <div style="text-align:center;padding:16px;font-size:13px;color:#888">
+    <button onclick="window.print()" style="padding:12px 28px;background:#2d2d2d;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:Nunito,sans-serif">🖨️ Print / Save as PDF</button>
+  </div>
+  </body></html>`);
+  w.document.close();
+}
+
+function printBoard() { openPrintWindow(buildBoardHTML()); }
+function printCards() { openPrintWindow(buildCardsHTML()); }
+function printRules() { openPrintWindow(buildRulesHTML()); }
+</script>
+</body>
+</html>
